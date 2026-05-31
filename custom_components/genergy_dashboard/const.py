@@ -1,7 +1,7 @@
 """Constants for the Genergy Dashboard integration."""
 
 DOMAIN = "genergy_dashboard"
-VERSION = "2.23.0-pre.1"
+VERSION = "3.0.0"
 DASHBOARD_URL_PATH = "dashboard-sigenergy"
 DASHBOARD_TITLE = "Teerathap sigenergy"
 
