@@ -90,12 +90,12 @@ const DEFAULT_CONFIG = {
     cable_static: "#888888",
   },
   click_zones: {
-    solar:    { x: 300, y: 0,   w: 350, h: 200, color: '#F0D850', label: 'SOLAR' },
-    home:     { x: 500, y: 0,   w: 300, h: 200, color: '#3498db', label: 'HOME' },
-    battery:  { x: 200, y: 650, w: 300, h: 280, color: '#2ecc71', label: 'BATTERY' },
-    grid:     { x: 700, y: 550, w: 300, h: 280, color: '#e74c3c', label: 'GRID' },
-    ev:       { x: 0,   y: 450, w: 200, h: 250, color: '#ff69b4', label: 'EV' },
-    heatpump: { x: 850, y: 350, w: 250, h: 250, color: '#e67e22', label: 'HEAT PUMP' },
+    solar:    { x: 300, y: 0,   w: 350, h: 200, color: '#F0D850', label: 'โซลาร์' },
+    home:     { x: 500, y: 0,   w: 300, h: 200, color: '#3498db', label: 'บ้าน' },
+    battery:  { x: 200, y: 650, w: 300, h: 280, color: '#2ecc71', label: 'แบตเตอรี่' },
+    grid:     { x: 700, y: 550, w: 300, h: 280, color: '#e74c3c', label: 'การไฟฟ้า' },
+    ev:       { x: 0,   y: 450, w: 200, h: 250, color: '#ff69b4', label: 'รถ EV' },
+    heatpump: { x: 850, y: 350, w: 250, h: 250, color: '#e67e22', label: 'ปั๊มความร้อน' },
   },
   label_positions: {},
   swap_battery_colors: false,
@@ -143,13 +143,13 @@ const PATHS = {
 
 // ─── Label positions (% of container) ────────────────────────────────────────
 const LABELS = {
-  solar:   { top: "2%",  left: "36%",  entity: "solar_power",      label: "SOLAR",     color: "solar" },
-  home:    { top: "2%",  left: "55%",  entity: "load_power",       label: "HOME",      color: "home" },
-  battery: { top: "72%", left: "28%",  entity: "battery_soc",      label: "BATTERY", color: "battery_discharge" },
-  grid:    { top: "65%", left: "72%",  entity: "grid_import",      label: "GRID",      color: "grid_import" },
-  ev:      { top: "54%", left: "1%",   entity: "ev_charger_power",   label: "EV",          color: "ev" },
-  ac:      { top: "33%", left: "1%",   entity: "ev_charger_power",   label: "AC CHARGER",   color: "ev" },
-  heatpump:{ top: "43%", left: "78%",  entity: "heat_pump_power",    label: "HEAT PUMP",    color: "heat_pump" },
+  solar:   { top: "2%",  left: "36%",  entity: "solar_power",      label: "โซลาร์",     color: "solar" },
+  home:    { top: "2%",  left: "55%",  entity: "load_power",       label: "บ้าน",      color: "home" },
+  battery: { top: "72%", left: "28%",  entity: "battery_soc",      label: "แบตเตอรี่", color: "battery_discharge" },
+  grid:    { top: "65%", left: "72%",  entity: "grid_import",      label: "การไฟฟ้า",      color: "grid_import" },
+  ev:      { top: "54%", left: "1%",   entity: "ev_charger_power",   label: "รถ EV",          color: "ev" },
+  ac:      { top: "33%", left: "1%",   entity: "ev_charger_power",   label: "ที่ชาร์จรถ",   color: "ev" },
+  heatpump:{ top: "43%", left: "78%",  entity: "heat_pump_power",    label: "ปั๊มความร้อน",    color: "heat_pump" },
 };
 
 // ─── Card Class ──────────────────────────────────────────────────────────────
@@ -235,12 +235,12 @@ class SigenergyHouseCard extends LitElement {
 
   _defaultClickZones() {
     return {
-      solar:    { x: 300, y: 0,   w: 350, h: 200, color: '#F0D850', label: 'SOLAR' },
-      home:     { x: 500, y: 0,   w: 300, h: 200, color: '#3498db', label: 'HOME' },
-      battery:  { x: 200, y: 650, w: 300, h: 280, color: '#2ecc71', label: 'BATTERY' },
-      grid:     { x: 700, y: 550, w: 300, h: 280, color: '#e74c3c', label: 'GRID' },
-      ev:       { x: 0,   y: 450, w: 200, h: 250, color: '#ff69b4', label: 'EV' },
-      heatpump: { x: 850, y: 350, w: 250, h: 250, color: '#e67e22', label: 'HEAT PUMP' },
+      solar:    { x: 300, y: 0,   w: 350, h: 200, color: '#F0D850', label: 'โซลาร์' },
+      home:     { x: 500, y: 0,   w: 300, h: 200, color: '#3498db', label: 'บ้าน' },
+      battery:  { x: 200, y: 650, w: 300, h: 280, color: '#2ecc71', label: 'แบตเตอรี่' },
+      grid:     { x: 700, y: 550, w: 300, h: 280, color: '#e74c3c', label: 'การไฟฟ้า' },
+      ev:       { x: 0,   y: 450, w: 200, h: 250, color: '#ff69b4', label: 'รถ EV' },
+      heatpump: { x: 850, y: 350, w: 250, h: 250, color: '#e67e22', label: 'ปั๊มความร้อน' },
     };
   }
 
@@ -414,7 +414,7 @@ class SigenergyHouseCard extends LitElement {
       const reserved = this._batteryReservedSoc;
       if (reserved != null && reserved > this._batteryMinSoc && soc > reserved) {
         targetSoc = reserved;
-        targetLabel = ' reserve';
+        targetLabel = ' (สำรอง)';
       } else {
         targetSoc = this._batteryMinSoc;
         targetLabel = '';
@@ -425,7 +425,7 @@ class SigenergyHouseCard extends LitElement {
     const hours = remainingKwh / absPowerKw;
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
-    const timeStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
+    const timeStr = h > 0 ? `${h} ชม. ${m} นาที` : `${m} นาที`;
     return { timeStr, targetSoc, targetLabel, isCharging: pwr > 0 };
   }
   get _isImporting() { return this._gridPower > 1; }
@@ -751,7 +751,7 @@ class SigenergyHouseCard extends LitElement {
 
     // ── SoC Ring editor handle ──────────────────────────────────────────────
     const ring = this._editRing || { cx: 498, cy: 585, r: 32, skewX: 0, skewY: 0 };
-    const ringColor = '#00d4b8';
+    const ringColor = '#f5a623';
     const skX = ring.skewX || 0;
     const skY = ring.skewY || 0;
     const ringTransform = (skX || skY)
@@ -910,7 +910,7 @@ class SigenergyHouseCard extends LitElement {
     for (const [name, points] of Object.entries(this._editPaths)) {
       result[name] = this._pointsToPath(points);
     }
-    console.info('%c CABLE EDITOR — Current Paths:', 'color: #00d4b8; font-weight: bold;');
+    console.info('%c CABLE EDITOR — Current Paths:', 'color: #f5a623; font-weight: bold;');
     console.info(JSON.stringify(result, null, 2));
     // Also build the YAML config snippet
     let yaml = 'paths:\n';
@@ -922,7 +922,7 @@ class SigenergyHouseCard extends LitElement {
     yaml += `soc_ring_cx: ${Math.round(ring.cx)}\nsoc_ring_cy: ${Math.round(ring.cy)}\nsoc_ring_r: ${Math.round(ring.r)}\nsoc_ring_skew_x: ${(ring.skewX || 0).toFixed(1)}\nsoc_ring_skew_y: ${(ring.skewY || 0).toFixed(1)}\n`;
     console.info('%c YAML Config:', 'color: #F0D850; font-weight: bold;');
     console.info(yaml);
-    console.info('%c SoC Ring Position:', 'color: #00d4b8; font-weight: bold;');
+    console.info('%c SoC Ring Position:', 'color: #f5a623; font-weight: bold;');
     console.info(JSON.stringify(ring));
   }
 
@@ -1021,7 +1021,7 @@ class SigenergyHouseCard extends LitElement {
           url_path: 'dashboard-sigenergy',
           config: dashConfig,
         });
-        console.info('%c PATHS APPLIED & SAVED', 'color: #00d4b8; font-weight: bold;');
+        console.info('%c PATHS APPLIED & SAVED', 'color: #f5a623; font-weight: bold;');
         return; // HA will rebuild the card with new config
       }
     } catch (err) {
@@ -1316,12 +1316,12 @@ class SigenergyHouseCard extends LitElement {
         }
         const rt = this._batteryRuntime;
         if (this._isDischarging) {
-          statusLine = "Discharging";
-          if (rt) runtimeLine = `${rt.timeStr} to ${rt.targetSoc}%${rt.targetLabel || ''}`;
+          statusLine = "กำลังจ่ายไฟ";
+          if (rt) runtimeLine = `อีก ${rt.timeStr} ถึง ${rt.targetSoc}%${rt.targetLabel || ''}`;
           color = this._config.swap_battery_colors ? this._config.colors.battery_charge : this._config.colors.battery_discharge;
         } else if (this._isCharging) {
-          statusLine = "Charging";
-          if (rt) runtimeLine = `${rt.timeStr} to ${rt.targetSoc}%${rt.targetLabel || ''}`;
+          statusLine = "กำลังชาร์จ";
+          if (rt) runtimeLine = `อีก ${rt.timeStr} ถึง ${rt.targetSoc}%${rt.targetLabel || ''}`;
           color = this._config.swap_battery_colors ? this._config.colors.battery_discharge : this._config.colors.battery_charge;
         }
         break;
@@ -1330,10 +1330,10 @@ class SigenergyHouseCard extends LitElement {
         const gp = this._gridPower;
         primary = this._formatPower(gp, this._config.entities.grid_active || this._config.entities.grid_import);
         if (this._isImporting) {
-          statusLine = "Importing";
+          statusLine = "รับไฟเข้า";
           color = this._config.colors.grid_import;
         } else if (this._isExporting) {
-          statusLine = "Exporting";
+          statusLine = "ขายไฟออก";
           color = this._config.colors.grid_export;
         }
         break;
@@ -1347,17 +1347,17 @@ class SigenergyHouseCard extends LitElement {
           primary = this._formatPower(this._evPower, this._config.entities.ev_charger_power);
         }
         if (evRangeVal != null && !Number.isNaN(evRangeVal)) runtimeLine = `${Math.round(evRangeVal)} km`;
-        if (this._isEvCharging) statusLine = "Charging";
-        else if (this._isEvConnectedByState) statusLine = "Connected";
+        if (this._isEvCharging) statusLine = "กำลังชาร์จ";
+        else if (this._isEvConnectedByState) statusLine = "เชื่อมต่อแล้ว";
         break;
       }
       case "ac":
         primary = this._formatPower(this._evPower, this._config.entities.ev_charger_power);
-        if (this._isEvCharging) statusLine = "Charging";
+        if (this._isEvCharging) statusLine = "กำลังชาร์จ";
         break;
       case "heatpump":
         primary = this._formatPower(this._heatPumpPower, this._config.entities.heat_pump_power);
-        if (this._isHeatPumpActive) statusLine = "Active";
+        if (this._isHeatPumpActive) statusLine = "ทำงาน";
         break;
     }
 
@@ -1640,7 +1640,7 @@ class SigenergyHouseCard extends LitElement {
       .editor-title {
         font-size: 14px;
         font-weight: 700;
-        color: #00d4b8;
+        color: #f5a623;
         margin-bottom: 4px;
       }
 
@@ -1658,7 +1658,7 @@ class SigenergyHouseCard extends LitElement {
       }
 
       .copy-btn {
-        background: #00d4b8;
+        background: #f5a623;
         color: #1a1f2e;
         border: none;
         padding: 6px 14px;
@@ -1670,7 +1670,7 @@ class SigenergyHouseCard extends LitElement {
       }
 
       .copy-btn:hover {
-        background: #00d4b8;
+        background: #f5a623;
       }
 
       .apply-btn {
@@ -1875,6 +1875,6 @@ window.customCards.push({
 
 console.info(
   "%c SIGENERGY-HOUSE-CARD %c v3.17.0 ",
-  "color: white; background: #00d4b8; font-weight: bold; padding: 2px 6px; border-radius: 3px 0 0 3px;",
-  "color: #00d4b8; background: #1a1f2e; font-weight: bold; padding: 2px 6px; border-radius: 0 3px 3px 0;"
+  "color: white; background: #f5a623; font-weight: bold; padding: 2px 6px; border-radius: 3px 0 0 3px;",
+  "color: #f5a623; background: #1a1f2e; font-weight: bold; padding: 2px 6px; border-radius: 0 3px 3px 0;"
 );

@@ -1,0 +1,161 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ตั้งค่า Teerathap sigenergy",
+        "description": "ยินดีต้อนรับ! ถ้าคุณใช้อินเวอร์เตอร์ **Sigenergy** ให้เปิดสวิตช์ด้านล่างเพื่อข้ามการตั้งค่า — ระบบจะเติมชื่อเอนทิตีมาตรฐานของ Sigenergy ให้อัตโนมัติทั้งหมด\n\nสำหรับอินเวอร์เตอร์ยี่ห้ออื่น (Huawei, Deye, Goodwe, SolarEdge ฯลฯ) ให้ปิดสวิตช์ไว้ แล้วเลือกเอนทิตีเองในหน้าถัดไป",
+        "data": {
+          "use_sigenergy_defaults": "ฉันใช้อินเวอร์เตอร์ Sigenergy — ใช้ค่าที่เติมให้อัตโนมัติ"
+        }
+      },
+      "core": {
+        "title": "เซ็นเซอร์กำลังไฟหลัก",
+        "description": "เลือกเซ็นเซอร์กำลังไฟหลักของระบบอินเวอร์เตอร์",
+        "data": {
+          "solar_power": "กำลังไฟโซลาร์ (W)",
+          "load_power": "กำลังการใช้ไฟในบ้าน (W)",
+          "battery_power": "กำลังไฟแบตเตอรี่ (W)",
+          "battery_soc": "ระดับแบตเตอรี่ (%)",
+          "grid_power": "กำลังไฟกริด (W)"
+        }
+      },
+      "energy": {
+        "title": "เซ็นเซอร์พลังงานรายวัน",
+        "description": "เลือกเซ็นเซอร์พลังงานรวมรายวัน เปิดโหมดสองอัตรา (dual tariff) หากมิเตอร์อัจฉริยะรายงานค่าเรตสูง/ต่ำแยกกัน — ระบบจะสร้างเซ็นเซอร์รายวันแบบรวมให้อัตโนมัติ",
+        "data": {
+          "solar_energy_today": "พลังงานโซลาร์วันนี้ (kWh)",
+          "load_energy_today": "พลังงานที่ใช้วันนี้ (kWh)",
+          "battery_charge_today": "พลังงานชาร์จแบตวันนี้ (kWh)",
+          "battery_discharge_today": "พลังงานจ่ายแบตวันนี้ (kWh)",
+          "grid_import_today": "รับไฟเข้าวันนี้ (kWh) — เอนทิตีเดียว",
+          "grid_export_today": "ขายไฟออกวันนี้ (kWh) — เอนทิตีเดียว",
+          "feature_dual_tariff": "เปิดโหมดสองอัตรา (มิเตอร์ที่มีตัวนับเรตสูง/ต่ำ)",
+          "grid_import_high_tariff": "รับไฟเข้า — เรตสูง (kWh, ค่าสะสมจากมิเตอร์)",
+          "grid_import_low_tariff": "รับไฟเข้า — เรตต่ำ (kWh, ค่าสะสมจากมิเตอร์)",
+          "grid_export_high_tariff": "ขายไฟออก — เรตสูง (kWh, ค่าสะสมจากมิเตอร์)",
+          "grid_export_low_tariff": "ขายไฟออก — เรตต่ำ (kWh, ค่าสะสมจากมิเตอร์)"
+        }
+      },
+      "extras": {
+        "title": "เอนทิตีและฟีเจอร์เพิ่มเติม",
+        "description": "ตั้งค่าเซ็นเซอร์เสริม รายละเอียดอุปกรณ์ และฟีเจอร์ต่าง ๆ เปิด EMHASS/HAEO/Energy Manager/Solcast เพื่อเติมชื่อเอนทิตีมาตรฐานให้อัตโนมัติ",
+        "data": {
+          "weather": "เอนทิตีสภาพอากาศ",
+          "inverter_temp": "อุณหภูมิอินเวอร์เตอร์",
+          "battery_temp": "อุณหภูมิแบตเตอรี่",
+          "battery_pack1_soc": "ระดับแบตแพ็ก 1 (SoC)",
+          "battery_pack2_soc": "ระดับแบตแพ็ก 2 (SoC)",
+          "battery_pack3_soc": "ระดับแบตแพ็ก 3 (SoC)",
+          "inverter_rated_power": "กำลังพิกัดอินเวอร์เตอร์",
+          "pv1_power": "กำลังไฟสตริง PV 1",
+          "pv2_power": "กำลังไฟสตริง PV 2",
+          "grid_voltage": "แรงดันไฟกริด (L1 สำหรับระบบ 3 เฟส)",
+          "grid_frequency": "ความถี่ไฟกริด",
+          "grid_ct_clamp": "กำลังไฟจากแคลมป์ CT",
+          "feature_three_phase": "เปิดระบบกริด 3 เฟส (แสดงแรงดันรายเฟส)",
+          "grid_voltage_l2": "แรงดันไฟกริด — เฟส L2",
+          "grid_voltage_l3": "แรงดันไฟกริด — เฟส L3",
+          "battery_voltage": "แรงดันแบตเตอรี่",
+          "battery_current": "กระแสไฟแบตเตอรี่",
+          "inverter_output_power": "กำลังไฟขาออกอินเวอร์เตอร์",
+          "dc_transformer_temp": "อุณหภูมิหม้อแปลง DC",
+          "ev_charger_power": "กำลังไฟที่ชาร์จ EV (W)",
+          "ev_charger_state": "สถานะที่ชาร์จ EV",
+          "ev_energy_today": "พลังงานชาร์จ EV วันนี้ (kWh, สำหรับกราฟ Sankey)",
+          "ev_energy_daily_meter": "มิเตอร์รายวัน EV (สร้างอัตโนมัติสำหรับเซ็นเซอร์ค่าสะสม)",
+          "heat_pump_power": "กำลังไฟปั๊มความร้อน / HVAC (W)",
+          "heat_pump_energy_today": "พลังงานปั๊มความร้อนวันนี้ (kWh, สำหรับกราฟ Sankey)",
+          "hp_energy_daily_meter": "มิเตอร์รายวันปั๊มความร้อน (สร้างอัตโนมัติสำหรับเซ็นเซอร์ค่าสะสม)",
+          "feature_ev": "เปิดที่ชาร์จ EV (อนิเมชันบนการ์ดบ้าน)",
+          "feature_heat_pump": "เปิดปั๊มความร้อน (อนิเมชันบนการ์ดบ้าน)",
+          "ev_energy_is_cumulative": "เซ็นเซอร์พลังงาน EV เป็นค่าสะสม (ใช้มิเตอร์รายวัน)",
+          "hp_energy_is_cumulative": "เซ็นเซอร์พลังงานปั๊มความร้อนเป็นค่าสะสม (ใช้มิเตอร์รายวัน)",
+          "show_ev_in_sankey": "แสดงการใช้ไฟ EV ในกราฟ Sankey",
+          "show_hp_in_sankey": "แสดงปั๊มความร้อนในกราฟ Sankey",
+          "feature_emhass": "เปิด EMHASS (เติมชื่อเอนทิตีมาตรฐานให้)",
+          "feature_haeo": "เปิด HAEO (ตัวจัดการพลังงาน Home Assistant)",
+          "feature_solcast": "เปิด Solcast (เติมเอนทิตีพยากรณ์ให้)",
+          "battery_packs": "จำนวนแพ็กแบตเตอรี่"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "เซ็นเซอร์กำลังไฟหลัก",
+        "data": {
+          "solar_power": "กำลังไฟโซลาร์ (W)",
+          "load_power": "กำลังการใช้ไฟในบ้าน (W)",
+          "battery_power": "กำลังไฟแบตเตอรี่ (W)",
+          "battery_soc": "ระดับแบตเตอรี่ (%)",
+          "grid_power": "กำลังไฟกริด (W)"
+        }
+      },
+      "energy": {
+        "title": "เซ็นเซอร์พลังงานรายวัน",
+        "description": "เลือกเซ็นเซอร์พลังงานรวมรายวัน เปิดโหมดสองอัตรา (dual tariff) หากมิเตอร์อัจฉริยะรายงานค่าเรตสูง/ต่ำแยกกัน — ระบบจะสร้างเซ็นเซอร์รายวันแบบรวมให้อัตโนมัติ",
+        "data": {
+          "solar_energy_today": "พลังงานโซลาร์วันนี้ (kWh)",
+          "load_energy_today": "พลังงานที่ใช้วันนี้ (kWh)",
+          "battery_charge_today": "พลังงานชาร์จแบตวันนี้ (kWh)",
+          "battery_discharge_today": "พลังงานจ่ายแบตวันนี้ (kWh)",
+          "grid_import_today": "รับไฟเข้าวันนี้ (kWh) — เอนทิตีเดียว",
+          "grid_export_today": "ขายไฟออกวันนี้ (kWh) — เอนทิตีเดียว",
+          "feature_dual_tariff": "เปิดโหมดสองอัตรา (มิเตอร์ที่มีตัวนับเรตสูง/ต่ำ)",
+          "grid_import_high_tariff": "รับไฟเข้า — เรตสูง (kWh, ค่าสะสมจากมิเตอร์)",
+          "grid_import_low_tariff": "รับไฟเข้า — เรตต่ำ (kWh, ค่าสะสมจากมิเตอร์)",
+          "grid_export_high_tariff": "ขายไฟออก — เรตสูง (kWh, ค่าสะสมจากมิเตอร์)",
+          "grid_export_low_tariff": "ขายไฟออก — เรตต่ำ (kWh, ค่าสะสมจากมิเตอร์)"
+        }
+      },
+      "extras": {
+        "title": "เอนทิตีและฟีเจอร์เพิ่มเติม",
+        "data": {
+          "weather": "เอนทิตีสภาพอากาศ",
+          "inverter_temp": "อุณหภูมิอินเวอร์เตอร์",
+          "battery_temp": "อุณหภูมิแบตเตอรี่",
+          "battery_pack1_soc": "ระดับแบตแพ็ก 1 (SoC)",
+          "battery_pack2_soc": "ระดับแบตแพ็ก 2 (SoC)",
+          "battery_pack3_soc": "ระดับแบตแพ็ก 3 (SoC)",
+          "inverter_rated_power": "กำลังพิกัดอินเวอร์เตอร์",
+          "pv1_power": "กำลังไฟสตริง PV 1",
+          "pv2_power": "กำลังไฟสตริง PV 2",
+          "grid_voltage": "แรงดันไฟกริด (L1 สำหรับระบบ 3 เฟส)",
+          "grid_frequency": "ความถี่ไฟกริด",
+          "grid_ct_clamp": "กำลังไฟจากแคลมป์ CT",
+          "feature_three_phase": "เปิดระบบกริด 3 เฟส (แสดงแรงดันรายเฟส)",
+          "grid_voltage_l2": "แรงดันไฟกริด — เฟส L2",
+          "grid_voltage_l3": "แรงดันไฟกริด — เฟส L3",
+          "battery_voltage": "แรงดันแบตเตอรี่",
+          "battery_current": "กระแสไฟแบตเตอรี่",
+          "inverter_output_power": "กำลังไฟขาออกอินเวอร์เตอร์",
+          "dc_transformer_temp": "อุณหภูมิหม้อแปลง DC",
+          "ev_charger_power": "กำลังไฟที่ชาร์จ EV (W)",
+          "ev_charger_state": "สถานะที่ชาร์จ EV",
+          "ev_energy_today": "พลังงานชาร์จ EV วันนี้ (kWh, สำหรับกราฟ Sankey)",
+          "ev_energy_daily_meter": "มิเตอร์รายวัน EV (สร้างอัตโนมัติสำหรับเซ็นเซอร์ค่าสะสม)",
+          "heat_pump_power": "กำลังไฟปั๊มความร้อน / HVAC (W)",
+          "heat_pump_energy_today": "พลังงานปั๊มความร้อนวันนี้ (kWh, สำหรับกราฟ Sankey)",
+          "hp_energy_daily_meter": "มิเตอร์รายวันปั๊มความร้อน (สร้างอัตโนมัติสำหรับเซ็นเซอร์ค่าสะสม)",
+          "feature_ev": "เปิดที่ชาร์จ EV (อนิเมชันบนการ์ดบ้าน)",
+          "feature_heat_pump": "เปิดปั๊มความร้อน (อนิเมชันบนการ์ดบ้าน)",
+          "ev_energy_is_cumulative": "เซ็นเซอร์พลังงาน EV เป็นค่าสะสม (ใช้มิเตอร์รายวัน)",
+          "hp_energy_is_cumulative": "เซ็นเซอร์พลังงานปั๊มความร้อนเป็นค่าสะสม (ใช้มิเตอร์รายวัน)",
+          "show_ev_in_sankey": "แสดงการใช้ไฟ EV ในกราฟ Sankey",
+          "show_hp_in_sankey": "แสดงปั๊มความร้อนในกราฟ Sankey",
+          "feature_emhass": "เปิด EMHASS (เติมชื่อเอนทิตีมาตรฐานให้)",
+          "feature_haeo": "เปิด HAEO (ตัวจัดการพลังงาน Home Assistant)",
+          "feature_solcast": "เปิด Solcast (เติมเอนทิตีพยากรณ์ให้)",
+          "battery_packs": "จำนวนแพ็กแบตเตอรี่"
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_cards": {
+      "title": "ขาดการ์ด Frontend ของ HACS",
+      "description": "Genergy Dashboard ต้องใช้ปลั๊กอิน frontend ของ HACS เหล่านี้ แต่ยังไม่ได้ติดตั้ง: {cards} ติดตั้งผ่าน HACS (ส่วน Frontend) แล้วรีสตาร์ท Home Assistant"
+    }
+  }
+}

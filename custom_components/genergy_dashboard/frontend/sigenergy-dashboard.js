@@ -117,8 +117,8 @@ const DEFAULT_ENTITIES = {
   // EMHASS Deferrable Loads
   mpc_deferrable0: '',
   mpc_deferrable1: '',
-  deferrable0_label: 'Heat Pump',
-  deferrable1_label: 'Boiler',
+  deferrable0_label: 'ปั๊มความร้อน',
+  deferrable1_label: 'หม้อต้มน้ำ',
   deferrable0_power: '',
   deferrable1_power: '',
   // MPC Cost
@@ -202,9 +202,9 @@ const DEFAULT_CONFIG = {
   smart_load_sections: [],
   pricing: {
     source: 'custom',
-    cheap_threshold: 0.10,
-    expensive_threshold: 0.25,
-    currency: '€',
+    cheap_threshold: 3.0,
+    expensive_threshold: 4.5,
+    currency: '฿',
     show_price_overlay: true,
     show_price_badge: true,
     show_color_coding: true,
@@ -218,7 +218,7 @@ const DEFAULT_CONFIG = {
     soc_ring_low: 40,
     soc_ring_high: 60,
     kiosk_mode: false,
-    heat_pump_label: 'HEAT PUMP',
+    heat_pump_label: 'ปั๊มความร้อน',
     ev_charger_label: '',
     swap_battery_colors: false,
     sankey_color_theme: 'modern',
@@ -229,7 +229,7 @@ const DEFAULT_CONFIG = {
 
 const SANKEY_THEMES = {
   modern:  { solar: '#D4C850', battery: '#4ECDC4', grid_import: '#6B8FD4', home: '#9B7AB8', grid_export: '#7B8FD4', ev: '#E8705A', hp: '#E8A799', losses: '#444444' },
-  vibrant: { solar: '#c8b84a', battery: '#00d4b8', grid_import: '#6b7fd4', home: '#e8337f', grid_export: '#7c5cbf', ev: '#ff69b4', hp: '#e67e22', losses: '#444444' },
+  vibrant: { solar: '#c8b84a', battery: '#f5a623', grid_import: '#6b7fd4', home: '#e8337f', grid_export: '#7c5cbf', ev: '#ff69b4', hp: '#e67e22', losses: '#444444' },
 };
 
 class SigConfigStore {
@@ -569,6 +569,41 @@ try {
   }
 } catch (e) { /* ignore */ }
 
+// Global responsive hardening for tablet and phone use.
+// Injected once into the document head. Covers three concerns mandated by the
+// Apple-Glass spec: an opaque fallback where backdrop-filter is unsupported,
+// a 44px minimum touch target on interactive controls, reduced blur on small
+// screens to avoid jank, and a reduced-motion guard.
+(function injectResponsiveHardening() {
+  var STYLE_ID = 'teerathap-responsive-hardening';
+  try {
+    if (document.getElementById(STYLE_ID)) return;
+    var css =
+      '@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {' +
+      '  .gl-thick, .gl-regular, .gl-thin, .gl-hud { background: rgba(27,33,43,0.96) !important; }' +
+      '}' +
+      '@media (hover: none) and (pointer: coarse) {' +
+      '  button, .save-btn, .price-btn, .tab, .switch, [role="button"], ha-icon-button {' +
+      '    min-height: 44px; min-width: 44px;' +
+      '  }' +
+      '}' +
+      '@media (max-width: 1024px) {' +
+      '  .gl-thick, .gl-regular, .gl-thin, .gl-hud,' +
+      '  ha-card[style*="backdrop-filter"] {' +
+      '    -webkit-backdrop-filter: blur(14px) saturate(1.4) !important;' +
+      '    backdrop-filter: blur(14px) saturate(1.4) !important;' +
+      '  }' +
+      '}' +
+      '@media (prefers-reduced-motion: reduce) {' +
+      '  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }' +
+      '}';
+    var styleEl = document.createElement('style');
+    styleEl.id = STYLE_ID;
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+  } catch (e) { /* ignore */ }
+})();
+
 // Auto-load house card from same directory (after ConfigStore is available)
 if (!customElements.get('sigenergy-house-card')) {
   const _hcUrl = new URL('sigenergy-house-card.js', _SIGENERGY_SCRIPT_URL);
@@ -879,14 +914,14 @@ class GenergyModal {
 window.GenergyModal = GenergyModal;
 
 const _GENERGY_MODAL_TYPES = {
-  solar: { title: 'Solar', icon: 'mdi:solar-panel', color: '#F0D850' },
-  home: { title: 'Home Consumption', icon: 'mdi:home-lightning-bolt', color: '#3498db' },
-  battery: { title: 'Battery', icon: 'mdi:battery-charging-60', color: '#2ecc71' },
-  grid: { title: 'Grid', icon: 'mdi:transmission-tower', color: '#e74c3c' },
-  ev: { title: 'EV / Charger', icon: 'mdi:car-electric', color: '#ff69b4' },
-  heatpump: { title: 'Heat Pump', icon: 'mdi:heat-pump', color: '#e67e22' },
-  forecast: { title: 'Energy Forecast', icon: 'mdi:chart-timeline-variant', color: '#00d4b8' },
-  smart_load: { title: 'Smart Load', icon: 'mdi:lightning-bolt', color: '#00d4b8' },
+  solar: { title: 'โซลาร์', icon: 'mdi:solar-panel', color: '#F0D850' },
+  home: { title: 'การใช้ไฟในบ้าน', icon: 'mdi:home-lightning-bolt', color: '#3498db' },
+  battery: { title: 'แบตเตอรี่', icon: 'mdi:battery-charging-60', color: '#2ecc71' },
+  grid: { title: 'การไฟฟ้า', icon: 'mdi:transmission-tower', color: '#e74c3c' },
+  ev: { title: 'รถ EV / ที่ชาร์จ', icon: 'mdi:car-electric', color: '#ff69b4' },
+  heatpump: { title: 'ปั๊มความร้อน', icon: 'mdi:heat-pump', color: '#e67e22' },
+  forecast: { title: 'พยากรณ์พลังงาน', icon: 'mdi:chart-timeline-variant', color: '#f5a623' },
+  smart_load: { title: 'โหลดอัจฉริยะ', icon: 'mdi:lightning-bolt', color: '#f5a623' },
 };
 
 function _genergyEsc(value) {
@@ -920,8 +955,8 @@ function _genergyFormat(value, unit = '') {
   if (unit === 'W') return Math.abs(n) >= 1000 ? `${(n / 1000).toFixed(1)} kW` : `${Math.round(n)} W`;
   if (unit === 'kWh') return `${n.toFixed(n >= 10 ? 1 : 2)} kWh`;
   if (unit === '%') return `${Math.round(n)}%`;
-  if (unit === '€') return `€${n.toFixed(2)}`;
-  if (unit === '€/kWh') return `€${n.toFixed(3)}/kWh`;
+  if (unit === '฿') return `฿${n.toFixed(2)}`;
+  if (unit === '฿/kWh') return `฿${n.toFixed(3)}/kWh`;
   return `${n.toFixed(Math.abs(n) >= 10 ? 1 : 2)}${unit ? ' ' + unit : ''}`;
 }
 
@@ -934,7 +969,7 @@ function _genergyStateDisplay(hass, entityId, fallbackUnit = '') {
   return _genergyEsc(st.state);
 }
 
-function _genergyMetric(label, value, color = '#00d4b8') {
+function _genergyMetric(label, value, color = '#f5a623') {
   return `<div style="padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;min-width:0;">
     <div style="font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">${_genergyEsc(label)}</div>
     <div style="font-size:22px;font-weight:700;color:${color};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${value}</div>
@@ -944,7 +979,7 @@ function _genergyMetric(label, value, color = '#00d4b8') {
 function _genergyEntityRows(hass, rows) {
   const html = rows.filter(r => r?.entityId).map(r => {
     const st = _genergyState(hass, r.entityId);
-    const stateText = st ? _genergyStateDisplay(hass, r.entityId, r.unit) : 'not configured';
+    const stateText = st ? _genergyStateDisplay(hass, r.entityId, r.unit) : 'ยังไม่ได้ตั้งค่า';
     return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
       <div style="min-width:0;">
         <div style="font-size:13px;color:var(--primary-text-color,#e0e4ec);">${_genergyEsc(r.label)}</div>
@@ -953,7 +988,7 @@ function _genergyEntityRows(hass, rows) {
       <div style="font-size:13px;font-weight:600;color:${st ? 'var(--primary-text-color,#e0e4ec)' : '#667085'};white-space:nowrap;">${stateText}</div>
     </div>`;
   }).join('');
-  return html || '<div style="padding:12px;color:#8892a4;text-align:center;">No matching entities are configured yet.</div>';
+  return html || '<div style="padding:12px;color:#8892a4;text-align:center;">ยังไม่ได้ตั้งค่าเอนทิตีที่เกี่ยวข้อง</div>';
 }
 
 function _genergySection(title, body) {
@@ -965,96 +1000,96 @@ function _genergySection(title, body) {
 
 function _genergyPrimaryLabel(type) {
   return ({
-    solar: 'Live production',
-    home: 'Live consumption',
-    battery: 'Battery power / SoC',
-    grid: 'Live grid flow',
-    ev: 'Charging status',
-    heatpump: 'Live heat-pump load',
-    forecast: 'Forecast snapshot',
-  })[type] || 'Live value';
+    solar: 'กำลังผลิตขณะนี้',
+    home: 'การใช้ไฟขณะนี้',
+    battery: 'กำลังไฟ / ระดับแบต',
+    grid: 'การไหลของไฟกริด',
+    ev: 'สถานะการชาร์จ',
+    heatpump: 'กำลังไฟปั๊มความร้อน',
+    forecast: 'สรุปพยากรณ์',
+  })[type] || 'ค่าปัจจุบัน';
 }
 
 function _genergyStatusLabel(type) {
   return ({
-    solar: 'Solar state',
-    home: 'Load state',
-    battery: 'Charge state',
-    grid: 'Grid direction',
-    ev: 'Connection state',
-    heatpump: 'Operating state',
-  })[type] || 'Status';
+    solar: 'สถานะโซลาร์',
+    home: 'สถานะการใช้ไฟ',
+    battery: 'สถานะการชาร์จ',
+    grid: 'ทิศทางไฟกริด',
+    ev: 'สถานะการเชื่อมต่อ',
+    heatpump: 'สถานะการทำงาน',
+  })[type] || 'สถานะ';
 }
 
 function _genergyElementRows(type, cfg) {
   const e = cfg?.entities || {};
   if (type === 'solar') {
     return [
-      { label: 'Solar power', entityId: e.solar_power, unit: 'W' },
-      { label: 'Solar yield today', entityId: e.solar_energy_today, unit: 'kWh' },
-      { label: 'Forecast remaining', entityId: e.solcast_remaining, unit: 'kWh' },
-      { label: 'Forecast today', entityId: e.solcast_today || e.forecast_solar_today, unit: 'kWh' },
-      { label: 'Forecast tomorrow', entityId: e.solcast_tomorrow, unit: 'kWh' },
-      { label: 'PV string 1', entityId: e.pv1_power, unit: 'W' },
-      { label: 'PV string 2', entityId: e.pv2_power, unit: 'W' },
-      { label: 'PV string 3', entityId: e.pv3_power, unit: 'W' },
-      { label: 'PV string 4', entityId: e.pv4_power, unit: 'W' },
+      { label: 'กำลังผลิตโซลาร์', entityId: e.solar_power, unit: 'W' },
+      { label: 'ผลิตได้วันนี้', entityId: e.solar_energy_today, unit: 'kWh' },
+      { label: 'พยากรณ์คงเหลือ', entityId: e.solcast_remaining, unit: 'kWh' },
+      { label: 'พยากรณ์วันนี้', entityId: e.solcast_today || e.forecast_solar_today, unit: 'kWh' },
+      { label: 'พยากรณ์พรุ่งนี้', entityId: e.solcast_tomorrow, unit: 'kWh' },
+      { label: 'สตริง PV 1', entityId: e.pv1_power, unit: 'W' },
+      { label: 'สตริง PV 2', entityId: e.pv2_power, unit: 'W' },
+      { label: 'สตริง PV 3', entityId: e.pv3_power, unit: 'W' },
+      { label: 'สตริง PV 4', entityId: e.pv4_power, unit: 'W' },
     ];
   }
   if (type === 'battery') {
     return [
-      { label: 'State of charge', entityId: e.battery_soc || e.mpc_soc, unit: '%' },
-      { label: 'Charge/discharge power', entityId: e.battery_power || e.mpc_battery, unit: 'W' },
-      { label: 'Charge today', entityId: e.battery_charge_today, unit: 'kWh' },
-      { label: 'Discharge today', entityId: e.battery_discharge_today, unit: 'kWh' },
-      { label: 'Voltage', entityId: e.battery_voltage, unit: 'V' },
-      { label: 'Current', entityId: e.battery_current, unit: 'A' },
-      { label: 'Temperature', entityId: e.battery_temp, unit: '°C' },
-      { label: 'Pack 1 SoC', entityId: e.battery_pack1_soc, unit: '%' },
-      { label: 'Pack 2 SoC', entityId: e.battery_pack2_soc, unit: '%' },
-      { label: 'Pack 3 SoC', entityId: e.battery_pack3_soc, unit: '%' },
-      { label: 'Pack 4 SoC', entityId: e.battery_pack4_soc, unit: '%' },
+      { label: 'ระดับแบตเตอรี่ (SoC)', entityId: e.battery_soc || e.mpc_soc, unit: '%' },
+      { label: 'กำลังชาร์จ/จ่ายไฟ', entityId: e.battery_power || e.mpc_battery, unit: 'W' },
+      { label: 'ชาร์จเข้าวันนี้', entityId: e.battery_charge_today, unit: 'kWh' },
+      { label: 'จ่ายออกวันนี้', entityId: e.battery_discharge_today, unit: 'kWh' },
+      { label: 'แรงดันไฟ', entityId: e.battery_voltage, unit: 'V' },
+      { label: 'กระแสไฟ', entityId: e.battery_current, unit: 'A' },
+      { label: 'อุณหภูมิ', entityId: e.battery_temp, unit: '°C' },
+      { label: 'แพ็ก 1 (SoC)', entityId: e.battery_pack1_soc, unit: '%' },
+      { label: 'แพ็ก 2 (SoC)', entityId: e.battery_pack2_soc, unit: '%' },
+      { label: 'แพ็ก 3 (SoC)', entityId: e.battery_pack3_soc, unit: '%' },
+      { label: 'แพ็ก 4 (SoC)', entityId: e.battery_pack4_soc, unit: '%' },
     ];
   }
   if (type === 'grid') {
     return [
-      { label: 'Grid power', entityId: e.grid_active || e.grid_power || e.grid_active_power || e.haeo_grid_power, unit: 'W' },
-      { label: 'Import today', entityId: e.grid_import_today, unit: 'kWh' },
-      { label: 'Export today', entityId: e.grid_export_today, unit: 'kWh' },
-      { label: 'Import price', entityId: e.current_import_price || e.buy_price, unit: '€/kWh' },
-      { label: 'Export price', entityId: e.current_export_price || e.sell_price, unit: '€/kWh' },
-      { label: 'Import cost today', entityId: e.emhass_import_cost_daily || e.emhass_net_cost_today, unit: '€' },
-      { label: 'Export earnings today', entityId: e.emhass_export_earnings_daily, unit: '€' },
-      { label: 'Voltage L1', entityId: e.grid_voltage, unit: 'V' },
-      { label: 'Voltage L2', entityId: e.grid_voltage_l2, unit: 'V' },
-      { label: 'Voltage L3', entityId: e.grid_voltage_l3, unit: 'V' },
-      { label: 'Frequency', entityId: e.grid_frequency, unit: 'Hz' },
+      { label: 'กำลังไฟกริด', entityId: e.grid_active || e.grid_power || e.grid_active_power || e.haeo_grid_power, unit: 'W' },
+      { label: 'รับไฟเข้าวันนี้', entityId: e.grid_import_today, unit: 'kWh' },
+      { label: 'ขายไฟออกวันนี้', entityId: e.grid_export_today, unit: 'kWh' },
+      { label: 'ราคารับซื้อ', entityId: e.current_import_price || e.buy_price, unit: '฿/kWh' },
+      { label: 'ราคาขายออก', entityId: e.current_export_price || e.sell_price, unit: '฿/kWh' },
+      { label: 'ค่าไฟที่ซื้อวันนี้', entityId: e.emhass_import_cost_daily || e.emhass_net_cost_today, unit: '฿' },
+      { label: 'รายได้จากการขายวันนี้', entityId: e.emhass_export_earnings_daily, unit: '฿' },
+      { label: 'แรงดัน L1', entityId: e.grid_voltage, unit: 'V' },
+      { label: 'แรงดัน L2', entityId: e.grid_voltage_l2, unit: 'V' },
+      { label: 'แรงดัน L3', entityId: e.grid_voltage_l3, unit: 'V' },
+      { label: 'ความถี่', entityId: e.grid_frequency, unit: 'Hz' },
     ];
   }
   if (type === 'home') {
     return [
-      { label: 'Home load', entityId: e.load_power || e.mpc_load || e.haeo_load_power, unit: 'W' },
-      { label: 'Consumption today', entityId: e.load_energy_today, unit: 'kWh' },
-      { label: 'Solar production', entityId: e.solar_power || e.haeo_solar_power, unit: 'W' },
-      { label: 'Battery power', entityId: e.battery_power || e.haeo_battery_discharge || e.haeo_battery_charge, unit: 'W' },
-      { label: 'Grid power', entityId: e.grid_active || e.grid_power || e.haeo_grid_power, unit: 'W' },
+      { label: 'การใช้ไฟในบ้าน', entityId: e.load_power || e.mpc_load || e.haeo_load_power, unit: 'W' },
+      { label: 'ใช้ไฟวันนี้', entityId: e.load_energy_today, unit: 'kWh' },
+      { label: 'กำลังผลิตโซลาร์', entityId: e.solar_power || e.haeo_solar_power, unit: 'W' },
+      { label: 'กำลังไฟแบตเตอรี่', entityId: e.battery_power || e.haeo_battery_discharge || e.haeo_battery_charge, unit: 'W' },
+      { label: 'กำลังไฟกริด', entityId: e.grid_active || e.grid_power || e.haeo_grid_power, unit: 'W' },
     ];
   }
   if (type === 'ev') {
     return [
-      { label: 'Charging power', entityId: e.ev_charger_power, unit: 'W' },
-      { label: 'Charger state', entityId: e.ev_charger_state },
-      { label: 'Vehicle SoC', entityId: e.ev_soc, unit: '%' },
-      { label: 'Vehicle range', entityId: e.ev_range, unit: 'km' },
-      { label: 'EV energy today', entityId: e.ev_energy_daily_meter, unit: 'kWh' },
+      { label: 'กำลังชาร์จ', entityId: e.ev_charger_power, unit: 'W' },
+      { label: 'สถานะที่ชาร์จ', entityId: e.ev_charger_state },
+      { label: 'แบตเตอรี่รถ (SoC)', entityId: e.ev_soc, unit: '%' },
+      { label: 'ระยะวิ่งคงเหลือ', entityId: e.ev_range, unit: 'km' },
+      { label: 'พลังงานชาร์จรถวันนี้', entityId: e.ev_energy_daily_meter, unit: 'kWh' },
     ];
   }
   if (type === 'heatpump') {
     return [
-      { label: 'Heat pump power', entityId: e.heat_pump_power || e.deferrable0_power, unit: 'W' },
-      { label: 'Heat pump energy today', entityId: e.hp_energy_daily_meter, unit: 'kWh' },
-      { label: e.deferrable0_label || 'Deferrable load 0', entityId: e.mpc_deferrable0 },
-      { label: e.deferrable1_label || 'Deferrable load 1', entityId: e.mpc_deferrable1 },
+      { label: 'กำลังไฟปั๊มความร้อน', entityId: e.heat_pump_power || e.deferrable0_power, unit: 'W' },
+      { label: 'พลังงานปั๊มความร้อนวันนี้', entityId: e.hp_energy_daily_meter, unit: 'kWh' },
+      { label: e.deferrable0_label || 'โหลดเลื่อนได้ 0', entityId: e.mpc_deferrable0 },
+      { label: e.deferrable1_label || 'โหลดเลื่อนได้ 1', entityId: e.mpc_deferrable1 },
     ];
   }
   return [];
@@ -1071,48 +1106,48 @@ function _genergyOpenElementModal(type, detail, cfg, hass) {
     icon: meta.icon,
     size: type === 'forecast' ? 'large' : 'medium',
     tabs: type === 'forecast'
-      ? [{ label: 'Combined', icon: 'mdi:chart-line' }, { label: 'Power', icon: 'mdi:solar-power' }, { label: 'SoC', icon: 'mdi:battery' }, { label: 'Price', icon: 'mdi:currency-eur' }, { label: 'Loads', icon: 'mdi:home-lightning-bolt' }]
-      : [{ label: 'Overview', icon: 'mdi:view-dashboard' }, { label: 'Entities', icon: 'mdi:database' }],
+      ? [{ label: 'รวม', icon: 'mdi:chart-line' }, { label: 'กำลังไฟ', icon: 'mdi:solar-power' }, { label: 'ระดับแบต', icon: 'mdi:battery' }, { label: 'ราคา', icon: 'mdi:cash' }, { label: 'โหลด', icon: 'mdi:home-lightning-bolt' }]
+      : [{ label: 'ภาพรวม', icon: 'mdi:view-dashboard' }, { label: 'เอนทิตี', icon: 'mdi:database' }],
   });
   modal.open((body, tab) => {
     if (type === 'forecast') {
       const groups = [
-        { title: 'Power forecast', rows: _genergyElementRows('solar', cfg).slice(0, 5) },
-        { title: 'Battery / SoC forecast', rows: _genergyElementRows('battery', cfg).slice(0, 2).concat([{ label: 'MPC SoC', entityId: cfg.entities?.mpc_soc, unit: '%' }, { label: 'MPC battery', entityId: cfg.entities?.mpc_battery, unit: 'W' }]) },
-        { title: 'Pricing', rows: _genergyElementRows('grid', cfg).slice(3, 7) },
-        { title: 'Loads', rows: _genergyElementRows('home', cfg).concat([{ label: 'MPC load', entityId: cfg.entities?.mpc_load, unit: 'W' }]) },
+        { title: 'พยากรณ์กำลังไฟ', rows: _genergyElementRows('solar', cfg).slice(0, 5) },
+        { title: 'พยากรณ์แบตเตอรี่ / SoC', rows: _genergyElementRows('battery', cfg).slice(0, 2).concat([{ label: 'MPC SoC', entityId: cfg.entities?.mpc_soc, unit: '%' }, { label: 'MPC แบตเตอรี่', entityId: cfg.entities?.mpc_battery, unit: 'W' }]) },
+        { title: 'ราคา', rows: _genergyElementRows('grid', cfg).slice(3, 7) },
+        { title: 'โหลด', rows: _genergyElementRows('home', cfg).concat([{ label: 'MPC โหลด', entityId: cfg.entities?.mpc_load, unit: 'W' }]) },
       ];
       const visibleGroups = tab === 0 ? groups : [groups[Math.max(0, tab - 1)]];
       body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
-          ${_genergyMetric('Solar now', _genergyStateDisplay(hass, _genergyEntity(cfg, ['solar_power', 'haeo_solar_power']), 'W'), '#F0D850')}
-          ${_genergyMetric('Load now', _genergyStateDisplay(hass, _genergyEntity(cfg, ['load_power', 'mpc_load', 'haeo_load_power']), 'W'), '#3498db')}
-          ${_genergyMetric('Battery SoC', _genergyStateDisplay(hass, _genergyEntity(cfg, ['battery_soc', 'mpc_soc', 'haeo_battery_soc']), '%'), '#2ecc71')}
-          ${_genergyMetric('Import price', _genergyStateDisplay(hass, _genergyEntity(cfg, ['current_import_price', 'buy_price']), '€/kWh'), '#e74c3c')}
+          ${_genergyMetric('โซลาร์ขณะนี้', _genergyStateDisplay(hass, _genergyEntity(cfg, ['solar_power', 'haeo_solar_power']), 'W'), '#F0D850')}
+          ${_genergyMetric('การใช้ไฟขณะนี้', _genergyStateDisplay(hass, _genergyEntity(cfg, ['load_power', 'mpc_load', 'haeo_load_power']), 'W'), '#3498db')}
+          ${_genergyMetric('ระดับแบต (SoC)', _genergyStateDisplay(hass, _genergyEntity(cfg, ['battery_soc', 'mpc_soc', 'haeo_battery_soc']), '%'), '#2ecc71')}
+          ${_genergyMetric('ราคารับซื้อ', _genergyStateDisplay(hass, _genergyEntity(cfg, ['current_import_price', 'buy_price']), '฿/kWh'), '#e74c3c')}
         </div>
         ${visibleGroups.map(g => _genergySection(g.title, _genergyEntityRows(hass, g.rows))).join('')}
       </div>`;
       return;
     }
     if (tab === 1) {
-      body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">${_genergySection('Configured entities', _genergyEntityRows(hass, rows))}</div>`;
+      body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">${_genergySection('เอนทิตีที่ตั้งค่าไว้', _genergyEntityRows(hass, rows))}</div>`;
       return;
     }
     const mainEntity = rows.find(r => r.entityId)?.entityId;
     body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
         ${_genergyMetric(_genergyPrimaryLabel(type), detail.primary || _genergyStateDisplay(hass, mainEntity), color)}
-        ${detail.statusLine ? _genergyMetric(_genergyStatusLabel(type), _genergyEsc(detail.statusLine), color) : _genergyMetric('Data source', mainEntity ? _genergyEsc(mainEntity.split('.')[0]) : '—', color)}
+        ${detail.statusLine ? _genergyMetric(_genergyStatusLabel(type), _genergyEsc(detail.statusLine), color) : _genergyMetric('แหล่งข้อมูล', mainEntity ? _genergyEsc(mainEntity.split('.')[0]) : '—', color)}
       </div>
       <div class="genergy-battery-stack-slot"></div>
-      ${_genergySection('Live detail', _genergyEntityRows(hass, rows.slice(0, type === 'battery' ? 7 : 6)))}
-      ${type === 'battery' ? _genergySection('Limits', _genergyEntityRows(hass, [
-        { label: 'Capacity', entityId: cfg.entities?.battery_capacity, unit: 'kWh' },
-        { label: 'Maximum SoC', entityId: cfg.entities?.battery_max_soc, unit: '%' },
-        { label: 'Minimum SoC', entityId: cfg.entities?.battery_min_soc, unit: '%' },
-        { label: 'Reserved SoC', entityId: cfg.entities?.battery_reserved_soc, unit: '%' },
+      ${_genergySection('รายละเอียดสด', _genergyEntityRows(hass, rows.slice(0, type === 'battery' ? 7 : 6)))}
+      ${type === 'battery' ? _genergySection('ขีดจำกัด', _genergyEntityRows(hass, [
+        { label: 'ความจุ', entityId: cfg.entities?.battery_capacity, unit: 'kWh' },
+        { label: 'SoC สูงสุด', entityId: cfg.entities?.battery_max_soc, unit: '%' },
+        { label: 'SoC ต่ำสุด', entityId: cfg.entities?.battery_min_soc, unit: '%' },
+        { label: 'SoC สำรอง', entityId: cfg.entities?.battery_reserved_soc, unit: '%' },
       ])) : ''}
-      ${type === 'home' && Array.isArray(cfg.smart_loads) && cfg.smart_loads.length ? _genergySection('Configured smart loads', cfg.smart_loads.slice(0, 8).map(load => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><span>${_genergyEsc(load.label || load.entity_power)}</span><span style="color:#8892a4;">${_genergyStateDisplay(hass, load.entity_power, 'W')}</span></div>`).join('')) : ''}
+      ${type === 'home' && Array.isArray(cfg.smart_loads) && cfg.smart_loads.length ? _genergySection('โหลดอัจฉริยะที่ตั้งค่าไว้', cfg.smart_loads.slice(0, 8).map(load => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><span>${_genergyEsc(load.label || load.entity_power)}</span><span style="color:#8892a4;">${_genergyStateDisplay(hass, load.entity_power, 'W')}</span></div>`).join('')) : ''}
     </div>`;
     if (type === 'battery' && customElements.get('sigenergy-device-card')) {
       const slot = body.querySelector('.genergy-battery-stack-slot');
@@ -1151,11 +1186,11 @@ function _genergyOpenSmartLoadModal(detail, cfg, hass) {
     }
     const isActive = (power ?? parseFloat(detail.power || '0')) > (cfg.features?.smart_load_standby_threshold || 5);
     body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);text-align:center;">
-      <div style="font-size:44px;font-weight:800;color:${isActive ? '#00d4b8' : '#8892a4'};">${_genergyStateDisplay(hass, entityId, 'W')}</div>
+      <div style="font-size:44px;font-weight:800;color:${isActive ? '#f5a623' : '#8892a4'};">${_genergyStateDisplay(hass, entityId, 'W')}</div>
       <div style="font-size:13px;color:#8892a4;margin-top:4px;">${_genergyEsc(appType.replace(/_/g, ' '))}</div>
-      <div style="margin:16px auto 0;display:inline-flex;padding:7px 12px;border-radius:999px;border:1px solid ${isActive ? 'rgba(0,212,184,.35)' : 'rgba(136,146,164,.25)'};color:${isActive ? '#00d4b8' : '#8892a4'};background:${isActive ? 'rgba(0,212,184,.1)' : 'rgba(136,146,164,.08)'};">${isActive ? 'Active' : 'Idle / standby'}</div>
+      <div style="margin:16px auto 0;display:inline-flex;padding:7px 12px;border-radius:999px;border:1px solid ${isActive ? 'rgba(0,212,184,.35)' : 'rgba(136,146,164,.25)'};color:${isActive ? '#f5a623' : '#8892a4'};background:${isActive ? 'rgba(0,212,184,.1)' : 'rgba(136,146,164,.08)'};">${isActive ? 'Active' : 'Idle / standby'}</div>
       ${_genergySection('Live detail', _genergyEntityRows(hass, rows))}
-      ${switchEntity ? '<button class="genergy-smart-toggle" style="margin-top:14px;width:100%;padding:12px;border:none;border-radius:10px;background:#00d4b8;color:#071512;font-weight:700;cursor:pointer;">Toggle device</button>' : '<div style="margin-top:14px;font-size:11px;color:#8892a4;">Add entity_switch to this smart load config to enable control from the modal.</div>'}
+      ${switchEntity ? '<button class="genergy-smart-toggle" style="margin-top:14px;width:100%;padding:12px;border:none;border-radius:10px;background:#f5a623;color:#071512;font-weight:700;cursor:pointer;">Toggle device</button>' : '<div style="margin-top:14px;font-size:11px;color:#8892a4;">Add entity_switch to this smart load config to enable control from the modal.</div>'}
     </div>`;
     const toggle = body.querySelector('.genergy-smart-toggle');
     if (toggle && hass?.callService) {
@@ -1199,41 +1234,41 @@ document.addEventListener('genergy-modal', (e) => {
   switch (type) {
     case 'solar': {
       const m = new GenergyModal({
-        title: detail.label || 'Solar',
+        title: detail.label || 'โซลาร์',
         icon: 'mdi:solar-panel',
         size: 'medium',
-        tabs: [{ label: 'Overview', icon: 'mdi:information-outline' }, { label: 'History', icon: 'mdi:chart-line' }],
+        tabs: [{ label: 'ภาพรวม', icon: 'mdi:information-outline' }, { label: 'ประวัติ', icon: 'mdi:chart-line' }],
       });
       m.open((body, tab) => {
         if (tab === 0) {
           body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">
             <div style="font-size:32px;font-weight:700;color:#F0D850;margin-bottom:8px;">${detail.primary || '—'}</div>
-            <div style="font-size:14px;color:#8892a4;">Current solar production</div>
+            <div style="font-size:14px;color:#8892a4;">กำลังผลิตโซลาร์ขณะนี้</div>
             ${detail.statusLine ? `<div style="margin-top:12px;font-size:13px;color:#F0D850;">${detail.statusLine}</div>` : ''}
             <div style="margin-top:20px;padding:16px;background:rgba(240,216,80,0.08);border:1px solid rgba(240,216,80,0.2);border-radius:12px;">
-              <div style="font-size:11px;color:#8892a4;">Detail modals with charts coming in Phase 7</div>
+              <div style="font-size:11px;color:#8892a4;">รายละเอียดเพิ่มเติมพร้อมกราฟกำลังมาเร็ว ๆ นี้</div>
             </div>
           </div>`;
         } else {
-          body.innerHTML = '<div style="padding:20px;color:#8892a4;text-align:center;">History charts coming in Phase 7</div>';
+          body.innerHTML = '<div style="padding:20px;color:#8892a4;text-align:center;">กราฟประวัติกำลังมาเร็ว ๆ นี้</div>';
         }
       });
       break;
     }
     case 'home': {
       const m = new GenergyModal({
-        title: detail.label || 'Home',
+        title: detail.label || 'บ้าน',
         icon: 'mdi:home-lightning-bolt',
         size: 'medium',
-        tabs: [{ label: 'Overview', icon: 'mdi:information-outline' }, { label: 'Breakdown', icon: 'mdi:chart-pie' }],
+        tabs: [{ label: 'ภาพรวม', icon: 'mdi:information-outline' }, { label: 'รายละเอียด', icon: 'mdi:chart-pie' }],
       });
       m.open((body, tab) => {
         body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">
           <div style="font-size:32px;font-weight:700;color:#3498db;margin-bottom:8px;">${detail.primary || '—'}</div>
-          <div style="font-size:14px;color:#8892a4;">Current home consumption</div>
+          <div style="font-size:14px;color:#8892a4;">การใช้ไฟในบ้านขณะนี้</div>
           ${detail.statusLine ? `<div style="margin-top:12px;font-size:13px;color:#3498db;">${detail.statusLine}</div>` : ''}
           <div style="margin-top:20px;padding:16px;background:rgba(52,152,219,0.08);border:1px solid rgba(52,152,219,0.2);border-radius:12px;">
-            <div style="font-size:11px;color:#8892a4;">${tab === 0 ? 'Detail modals with charts coming in Phase 7' : 'Load breakdown coming in Phase 7'}</div>
+            <div style="font-size:11px;color:#8892a4;">รายละเอียดกำลังมาเร็ว ๆ นี้</div>
           </div>
         </div>`;
       });
@@ -1241,19 +1276,19 @@ document.addEventListener('genergy-modal', (e) => {
     }
     case 'battery': {
       const m = new GenergyModal({
-        title: detail.label || 'Battery',
+        title: detail.label || 'แบตเตอรี่',
         icon: 'mdi:battery-charging-60',
         size: 'medium',
-        tabs: [{ label: 'Status', icon: 'mdi:information-outline' }, { label: 'History', icon: 'mdi:chart-line' }, { label: 'Settings', icon: 'mdi:cog' }],
+        tabs: [{ label: 'สถานะ', icon: 'mdi:information-outline' }, { label: 'ประวัติ', icon: 'mdi:chart-line' }, { label: 'ตั้งค่า', icon: 'mdi:cog' }],
       });
       m.open((body, tab) => {
         const color = detail.color || '#2ecc71';
         body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">
           <div style="font-size:32px;font-weight:700;color:${color};margin-bottom:8px;">${detail.primary || '—'}</div>
-          <div style="font-size:14px;color:#8892a4;">Battery status</div>
+          <div style="font-size:14px;color:#8892a4;">สถานะแบตเตอรี่</div>
           ${detail.statusLine ? `<div style="margin-top:12px;font-size:13px;color:${color};">${detail.statusLine}</div>` : ''}
           <div style="margin-top:20px;padding:16px;background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.2);border-radius:12px;">
-            <div style="font-size:11px;color:#8892a4;">${tab === 0 ? 'Full battery status coming in Phase 7' : tab === 1 ? 'SoC history chart coming in Phase 7' : 'Battery settings coming in Phase 7'}</div>
+            <div style="font-size:11px;color:#8892a4;">รายละเอียดกำลังมาเร็ว ๆ นี้</div>
           </div>
         </div>`;
       });
@@ -1261,19 +1296,19 @@ document.addEventListener('genergy-modal', (e) => {
     }
     case 'grid': {
       const m = new GenergyModal({
-        title: detail.label || 'Grid',
+        title: detail.label || 'การไฟฟ้า',
         icon: 'mdi:transmission-tower',
         size: 'medium',
-        tabs: [{ label: 'Status', icon: 'mdi:information-outline' }, { label: 'Pricing', icon: 'mdi:currency-eur' }],
+        tabs: [{ label: 'สถานะ', icon: 'mdi:information-outline' }, { label: 'ราคา', icon: 'mdi:cash' }],
       });
       m.open((body, tab) => {
         const color = detail.color || '#e74c3c';
         body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">
           <div style="font-size:32px;font-weight:700;color:${color};margin-bottom:8px;">${detail.primary || '—'}</div>
-          <div style="font-size:14px;color:#8892a4;">Grid connection</div>
+          <div style="font-size:14px;color:#8892a4;">การเชื่อมต่อการไฟฟ้า</div>
           ${detail.statusLine ? `<div style="margin-top:12px;font-size:13px;color:${color};">${detail.statusLine}</div>` : ''}
           <div style="margin-top:20px;padding:16px;background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);border-radius:12px;">
-            <div style="font-size:11px;color:#8892a4;">${tab === 0 ? 'Grid detail coming in Phase 7' : 'Price info coming in Phase 7'}</div>
+            <div style="font-size:11px;color:#8892a4;">รายละเอียดกำลังมาเร็ว ๆ นี้</div>
           </div>
         </div>`;
       });
@@ -1281,18 +1316,18 @@ document.addEventListener('genergy-modal', (e) => {
     }
     case 'ev': {
       const m = new GenergyModal({
-        title: detail.label || 'EV',
+        title: detail.label || 'รถ EV',
         icon: 'mdi:car-electric',
         size: 'medium',
-        tabs: [{ label: 'Status', icon: 'mdi:information-outline' }, { label: 'Sessions', icon: 'mdi:history' }],
+        tabs: [{ label: 'สถานะ', icon: 'mdi:information-outline' }, { label: 'ประวัติการชาร์จ', icon: 'mdi:history' }],
       });
       m.open((body, tab) => {
         body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">
           <div style="font-size:32px;font-weight:700;color:#ff69b4;margin-bottom:8px;">${detail.primary || '—'}</div>
-          <div style="font-size:14px;color:#8892a4;">EV / Charger</div>
+          <div style="font-size:14px;color:#8892a4;">รถ EV / ที่ชาร์จ</div>
           ${detail.statusLine ? `<div style="margin-top:12px;font-size:13px;color:#ff69b4;">${detail.statusLine}</div>` : ''}
           <div style="margin-top:20px;padding:16px;background:rgba(255,105,180,0.08);border:1px solid rgba(255,105,180,0.2);border-radius:12px;">
-            <div style="font-size:11px;color:#8892a4;">${tab === 0 ? 'EV detail coming in Phase 7' : 'Charging sessions coming in Phase 7'}</div>
+            <div style="font-size:11px;color:#8892a4;">รายละเอียดกำลังมาเร็ว ๆ นี้</div>
           </div>
         </div>`;
       });
@@ -1300,18 +1335,18 @@ document.addEventListener('genergy-modal', (e) => {
     }
     case 'heatpump': {
       const m = new GenergyModal({
-        title: detail.label || 'Heat Pump',
+        title: detail.label || 'ปั๊มความร้อน',
         icon: 'mdi:heat-pump',
         size: 'medium',
-        tabs: [{ label: 'Status', icon: 'mdi:information-outline' }, { label: 'Schedule', icon: 'mdi:calendar-clock' }],
+        tabs: [{ label: 'สถานะ', icon: 'mdi:information-outline' }, { label: 'ตารางเวลา', icon: 'mdi:calendar-clock' }],
       });
       m.open((body, tab) => {
         body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);">
           <div style="font-size:32px;font-weight:700;color:#e67e22;margin-bottom:8px;">${detail.primary || '—'}</div>
-          <div style="font-size:14px;color:#8892a4;">Heat Pump / HVAC</div>
+          <div style="font-size:14px;color:#8892a4;">ปั๊มความร้อน / HVAC</div>
           ${detail.statusLine ? `<div style="margin-top:12px;font-size:13px;color:#e67e22;">${detail.statusLine}</div>` : ''}
           <div style="margin-top:20px;padding:16px;background:rgba(230,126,34,0.08);border:1px solid rgba(230,126,34,0.2);border-radius:12px;">
-            <div style="font-size:11px;color:#8892a4;">${tab === 0 ? 'Heat pump detail coming in Phase 7' : 'Schedule coming in Phase 7'}</div>
+            <div style="font-size:11px;color:#8892a4;">รายละเอียดกำลังมาเร็ว ๆ นี้</div>
           </div>
         </div>`;
       });
@@ -1320,7 +1355,7 @@ document.addEventListener('genergy-modal', (e) => {
     case 'smart_load': {
       const appType = detail.applianceType || 'plug_socket';
       const m = new GenergyModal({
-        title: detail.label || 'Smart Load',
+        title: detail.label || 'โหลดอัจฉริยะ',
         icon: 'mdi:lightning-bolt',
         size: 'small',
       });
@@ -1328,19 +1363,19 @@ document.addEventListener('genergy-modal', (e) => {
         const w = parseFloat(detail.power) || 0;
         const pwrStr = Math.abs(w) >= 1000 ? (Math.abs(w)/1000).toFixed(1) + ' kW' : Math.round(Math.abs(w)) + ' W';
         body.innerHTML = `<div style="padding:20px;color:var(--primary-text-color,#e0e4ec);text-align:center;">
-          <div style="font-size:48px;font-weight:700;color:${w > 5 ? '#00d4b8' : '#8892a4'};margin-bottom:8px;">${pwrStr}</div>
+          <div style="font-size:48px;font-weight:700;color:${w > 5 ? '#f5a623' : '#8892a4'};margin-bottom:8px;">${pwrStr}</div>
           <div style="font-size:14px;color:#8892a4;margin-bottom:16px;">${detail.label}</div>
           <div style="display:flex;gap:8px;justify-content:center;">
-            <div style="padding:8px 16px;background:rgba(0,212,184,0.1);border:1px solid rgba(0,212,184,0.3);border-radius:8px;font-size:12px;color:#00d4b8;">
-              ${w > 5 ? '🟢 Active' : w > 0 ? '🟡 Standby' : '⚫ Off'}
+            <div style="padding:8px 16px;background:rgba(0,212,184,0.1);border:1px solid rgba(0,212,184,0.3);border-radius:8px;font-size:12px;color:#f5a623;">
+              ${w > 5 ? '🟢 ทำงาน' : w > 0 ? '🟡 สแตนด์บาย' : '⚫ ปิด'}
             </div>
           </div>
           <div style="margin-top:20px;padding:16px;background:rgba(45,52,81,0.5);border-radius:12px;">
-            <div style="font-size:11px;color:#8892a4;">Entity: ${detail.entityId || '—'}</div>
-            <div style="font-size:11px;color:#8892a4;margin-top:4px;">Type: ${appType}</div>
+            <div style="font-size:11px;color:#8892a4;">เอนทิตี: ${detail.entityId || '—'}</div>
+            <div style="font-size:11px;color:#8892a4;margin-top:4px;">ประเภท: ${appType}</div>
           </div>
           <div style="margin-top:16px;padding:12px;background:rgba(0,212,184,0.06);border:1px solid rgba(0,212,184,0.15);border-radius:8px;">
-            <div style="font-size:10px;color:#8892a4;">ON/OFF toggle + history coming in Phase 8</div>
+            <div style="font-size:10px;color:#8892a4;">ปุ่มเปิด/ปิด + ประวัติกำลังมาเร็ว ๆ นี้</div>
           </div>
         </div>`;
       });
@@ -1377,7 +1412,7 @@ document.addEventListener('genergy-modal', (e) => {
       origParent?.insertBefore(placeholder, apexEl);
 
       const m = new GenergyModal({
-        title: 'Energy Forecast Chart',
+        title: 'กราฟพยากรณ์พลังงาน',
         icon: 'mdi:chart-areaspline',
         size: 'fullscreen',
         onClose: () => {
@@ -1579,16 +1614,16 @@ class SigenergyForecastModalButton extends HTMLElement {
         }
         button:hover { background:rgba(0,212,184,.14); }
         button.active { background:rgba(0,212,184,.22); border-color:rgba(0,212,184,.5); }
-        ha-icon { color:#00d4b8; --mdc-icon-size:18px; }
+        ha-icon { color:#f5a623; --mdc-icon-size:18px; }
       </style>
       <div class="btn-row">
-        <button type="button" class="details-btn" aria-label="Open forecast details modal">
+        <button type="button" class="details-btn" aria-label="เปิดรายละเอียดพยากรณ์">
           <ha-icon icon="mdi:table-eye"></ha-icon>
-          Forecast Details
+          รายละเอียดพยากรณ์
         </button>
-        <button type="button" class="expand-btn" aria-label="Expand chart view">
+        <button type="button" class="expand-btn" aria-label="ขยายกราฟ">
           <ha-icon icon="mdi:arrow-expand"></ha-icon>
-          Expand Chart
+          ขยายกราฟ
         </button>
       </div>
     `;
@@ -1596,7 +1631,7 @@ class SigenergyForecastModalButton extends HTMLElement {
       this.dispatchEvent(new CustomEvent('genergy-modal', {
         bubbles: true,
         composed: true,
-        detail: { type: 'forecast', label: 'Energy Forecast', config: cfg, hass: this._hass },
+        detail: { type: 'forecast', label: 'พยากรณ์พลังงาน', config: cfg, hass: this._hass },
       }));
     });
     this.shadowRoot.querySelector('.expand-btn')?.addEventListener('click', () => {
@@ -2016,11 +2051,11 @@ class SigenergySettingsCard extends HTMLElement {
           transition: color 0.2s, background 0.2s, border-bottom-color 0.2s;
         }
         .tab:hover { color: var(--primary-text-color, #fff); background: rgba(0,212,184,0.08); }
-        .tab.active { color: #00d4b8; border-bottom-color: #00d4b8; }
+        .tab.active { color: #f5a623; border-bottom-color: #f5a623; }
         .section { margin-bottom: 16px; }
         .section-title {
           font-size: 12px; font-weight: 700; text-transform: uppercase;
-          letter-spacing: 1.2px; color: #00d4b8;
+          letter-spacing: 1.2px; color: #f5a623;
           margin-bottom: 8px; padding-bottom: 4px;
           border-bottom: 1px solid rgba(0,212,184,0.2);
         }
@@ -2038,10 +2073,10 @@ class SigenergySettingsCard extends HTMLElement {
           font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace;
           text-overflow: ellipsis;
         }
-        .row-input:focus { outline: none; border-color: #00d4b8; }
+        .row-input:focus { outline: none; border-color: #f5a623; }
         .row-state {
           min-width: 80px; text-align: right; font-size: 11px;
-          font-weight: 600; color: #00d4b8; white-space: nowrap;
+          font-weight: 600; color: #f5a623; white-space: nowrap;
         }
         .row-state.err { color: #e74c3c; }
         .toggle-row {
@@ -2058,7 +2093,7 @@ class SigenergySettingsCard extends HTMLElement {
           transition: background 0.3s; flex-shrink: 0;
         }
         .switch.off { background: #3a4058; }
-        .switch.on { background: #00d4b8; }
+        .switch.on { background: #f5a623; }
         .switch::after {
           content: ''; position: absolute;
           width: 20px; height: 20px; border-radius: 50%;
@@ -2074,11 +2109,11 @@ class SigenergySettingsCard extends HTMLElement {
           cursor: pointer; text-align: center; font-size: 13px;
           font-weight: 500; transition: border-color 0.2s, background 0.2s;
         }
-        .price-btn:hover { border-color: #00d4b8; }
-        .price-btn.active { border-color: #00d4b8; background: rgba(0,212,184,0.12); }
+        .price-btn:hover { border-color: #f5a623; }
+        .price-btn.active { border-color: #f5a623; background: rgba(0,212,184,0.12); }
         .save-btn {
           display: block; width: 100%; padding: 12px;
-          margin-top: 14px; background: #00d4b8; color: #1a1f2e;
+          margin-top: 14px; background: #f5a623; color: #1a1f2e;
           border: none; border-radius: 8px; font-size: 14px;
           font-weight: 700; cursor: pointer; transition: opacity 0.2s;
           letter-spacing: 0.5px;
@@ -2104,22 +2139,22 @@ class SigenergySettingsCard extends HTMLElement {
         .entity-dropdown-item .entity-state { opacity: 0.6; font-size: 11px; margin-left: 6px; }
         .section-detect-btn {
           background: none; border: 1px solid rgba(0,212,184,0.3); border-radius: 4px;
-          color: #00d4b8; cursor: pointer; font-size: 11px; padding: 2px 6px;
+          color: #f5a623; cursor: pointer; font-size: 11px; padding: 2px 6px;
           margin-left: 8px; transition: background 0.2s, border-color 0.2s;
         }
-        .section-detect-btn:hover { background: rgba(0,212,184,0.15); border-color: #00d4b8; }
+        .section-detect-btn:hover { background: rgba(0,212,184,0.15); border-color: #f5a623; }
         .candidate-picker {
           margin-top: 4px; padding: 6px; background: rgba(0,212,184,0.05);
           border: 1px solid rgba(0,212,184,0.2); border-radius: 6px; font-size: 11px;
         }
-        .candidate-picker .cp-header { color: #00d4b8; font-weight: 600; margin-bottom: 4px; }
+        .candidate-picker .cp-header { color: #f5a623; font-weight: 600; margin-bottom: 4px; }
         .candidate-item {
           display: flex; align-items: center; justify-content: space-between;
           padding: 4px 6px; margin: 2px 0; cursor: pointer; border-radius: 4px;
           background: rgba(255,255,255,0.03); border: 1px solid transparent;
           transition: background 0.2s, border-color 0.2s;
         }
-        .candidate-item:hover { border-color: #00d4b8; background: rgba(0,212,184,0.1); cursor: pointer; }
+        .candidate-item:hover { border-color: #f5a623; background: rgba(0,212,184,0.1); cursor: pointer; }
         .candidate-item.cand-disabled { opacity: 0.5; cursor: help; }
         .candidate-item .ci-id { font-family: monospace; font-size: 10px; }
         .candidate-item .ci-fn { font-family: sans-serif; color: #8892a4; font-style: italic; }
@@ -2157,7 +2192,7 @@ class SigenergySettingsCard extends HTMLElement {
         .prereq-list .card-name { font-weight: 600; color: #e74c3c; min-width: 130px; }
         .prereq-list .card-purpose { flex: 1; color: var(--secondary-text-color, #8892a4); }
         .prereq-list .card-link {
-          color: #00d4b8; text-decoration: none; font-weight: 600; font-size: 11px;
+          color: #f5a623; text-decoration: none; font-weight: 600; font-size: 11px;
           padding: 3px 8px; border: 1px solid rgba(0,212,184,0.4);
           border-radius: 4px; white-space: nowrap;
         }
@@ -2170,7 +2205,7 @@ class SigenergySettingsCard extends HTMLElement {
         .prereq-dismiss:hover { background: rgba(231,76,60,0.1); }
         .prereq-refresh {
           background: none; border: 1px solid rgba(0,212,184,0.4);
-          color: #00d4b8; font-size: 11px;
+          color: #f5a623; font-size: 11px;
           padding: 4px 10px; border-radius: 4px; cursor: pointer; margin-left: 6px;
         }
         .prereq-refresh:hover { background: rgba(0,212,184,0.1); }
@@ -2192,29 +2227,29 @@ class SigenergySettingsCard extends HTMLElement {
             `).join('')}
           </ul>
           <p style="font-size:11px;color:var(--secondary-text-color,#8892a4);margin:0 0 10px;">
-            Or open <a href="/hacs/integrations" target="_top" style="color:#00d4b8">HACS</a> and search for: ${missingCards.map(c => '<b>' + c.hacs + '</b>').join(', ')}
+            Or open <a href="/hacs/integrations" target="_top" style="color:#f5a623">HACS</a> and search for: ${missingCards.map(c => '<b>' + c.hacs + '</b>').join(', ')}
           </p>
           <button class="prereq-dismiss" id="prereq-dismiss">Dismiss</button>
           <button class="prereq-refresh" id="prereq-recheck">Re-check</button>
         </div>
         ` : ''}
         <div class="tabs">
-          <button class="tab ${tab===0?'active':''}" data-tab="0">⚡ Entities</button>
-          <button class="tab ${tab===1?'active':''}" data-tab="1">🔧 Features</button>
-          <button class="tab ${tab===2?'active':''}" data-tab="2">💰 Pricing</button>
-          <button class="tab ${tab===3?'active':''}" data-tab="3">🎨 Display</button>
+          <button class="tab ${tab===0?'active':''}" data-tab="0">⚡ เอนทิตี</button>
+          <button class="tab ${tab===1?'active':''}" data-tab="1">🔧 ฟีเจอร์</button>
+          <button class="tab ${tab===2?'active':''}" data-tab="2">💰 ราคาค่าไฟ</button>
+          <button class="tab ${tab===3?'active':''}" data-tab="3">🎨 การแสดงผล</button>
         </div>
         <div id="content"></div>
         <div id="action-bar" style="margin-top:16px;padding-top:14px;border-top:2px solid rgba(0,212,184,0.3);">
           <div style="background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.4);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
             <span style="font-size:20px;">⚠️</span>
             <div>
-              <div style="font-size:12px;font-weight:700;color:#FFA500;">Don't forget to Apply!</div>
-              <div style="font-size:11px;color:#8892a4;line-height:1.4;">After changing entities or features, click <b>Apply Settings to Dashboard</b> below to rebuild the dashboard with your new settings. Changes are saved automatically, but the dashboard only updates when you Apply.</div>
+              <div style="font-size:12px;font-weight:700;color:#FFA500;">อย่าลืมกด Apply!</div>
+              <div style="font-size:11px;color:#8892a4;line-height:1.4;">หลังเปลี่ยนเอนทิตีหรือฟีเจอร์ ให้กด <b>🔄 ใช้การตั้งค่ากับแดชบอร์ด</b> ด้านล่างเพื่อสร้างแดชบอร์ดใหม่ตามการตั้งค่าล่าสุด การตั้งค่าถูกบันทึกอัตโนมัติ แต่แดชบอร์ดจะอัปเดตเมื่อกด Apply เท่านั้น</div>
             </div>
           </div>
-          <button class="save-btn" id="global-save-btn">💾 Save All Settings</button>
-          <button class="save-btn" id="global-apply-btn" style="margin-top:8px;background:#3F51B5;">🔄 Apply Settings to Dashboard</button>
+          <button class="save-btn" id="global-save-btn">💾 บันทึกการตั้งค่าทั้งหมด</button>
+          <button class="save-btn" id="global-apply-btn" style="margin-top:8px;background:#3F51B5;">🔄 ใช้การตั้งค่ากับแดชบอร์ด</button>
           <div id="global-apply-status" style="text-align:center;margin-top:8px;font-size:12px;color:#8892a4;display:none;"></div>
         </div>
       </div>
@@ -2257,11 +2292,11 @@ class SigenergySettingsCard extends HTMLElement {
       globalSaveBtn.addEventListener('click', () => {
         const cfg2 = this._storeGet();
         this._storeSave(cfg2);
-        globalSaveBtn.textContent = '✅ Saved!';
+        globalSaveBtn.textContent = '✅ บันทึกแล้ว!';
         globalSaveBtn.style.background = '#2ecc71';
         setTimeout(() => {
-          globalSaveBtn.textContent = '💾 Save All Settings';
-          globalSaveBtn.style.background = '#00d4b8';
+          globalSaveBtn.textContent = '💾 บันทึกการตั้งค่าทั้งหมด';
+          globalSaveBtn.style.background = '#f5a623';
         }, 2000);
       });
     }
@@ -2272,29 +2307,29 @@ class SigenergySettingsCard extends HTMLElement {
       globalApplyBtn.addEventListener('click', async () => {
         const statusEl = this.shadowRoot.getElementById('global-apply-status');
         statusEl.style.display = 'block';
-        statusEl.textContent = '⏳ Rebuilding dashboard...';
+        statusEl.textContent = '⏳ กำลังสร้างแดชบอร์ดใหม่...';
         statusEl.style.color = '#FFA500';
         globalApplyBtn.disabled = true;
         globalApplyBtn.style.opacity = '0.5';
         try {
           const ok = await this._buildDashboard();
           if (ok) {
-            statusEl.textContent = '✅ Dashboard rebuilt! Refresh the page to see changes.';
+            statusEl.textContent = '✅ สร้างแดชบอร์ดใหม่แล้ว! รีเฟรชหน้าเพื่อดูผล';
             statusEl.style.color = '#2ecc71';
-            globalApplyBtn.textContent = '✅ Applied!';
+            globalApplyBtn.textContent = '✅ ใช้งานแล้ว!';
             globalApplyBtn.style.background = '#2ecc71';
           } else {
-            statusEl.textContent = '❌ Failed to rebuild dashboard. Check console.';
+            statusEl.textContent = '❌ สร้างแดชบอร์ดใหม่ไม่สำเร็จ ดูรายละเอียดใน console';
             statusEl.style.color = '#e74c3c';
           }
         } catch (err) {
-          statusEl.textContent = '❌ Error: ' + err.message;
+          statusEl.textContent = '❌ ผิดพลาด: ' + err.message;
           statusEl.style.color = '#e74c3c';
         }
         globalApplyBtn.disabled = false;
         globalApplyBtn.style.opacity = '1';
         setTimeout(() => {
-          globalApplyBtn.textContent = '🔄 Apply Settings to Dashboard';
+          globalApplyBtn.textContent = '🔄 ใช้การตั้งค่ากับแดชบอร์ด';
           globalApplyBtn.style.background = '#3F51B5';
         }, 3000);
       });
@@ -2621,41 +2656,41 @@ class SigenergySettingsCard extends HTMLElement {
       <div style="margin-bottom:16px;padding:12px;background:rgba(0,212,184,0.08);border:1px solid rgba(0,212,184,0.25);border-radius:10px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div>
-            <div style="font-size:13px;font-weight:600;color:#00d4b8;">🔍 Auto-Detect from HA Energy Dashboard</div>
+            <div style="font-size:13px;font-weight:600;color:#f5a623;">🔍 Auto-Detect from HA Energy Dashboard</div>
             <div style="font-size:11px;color:#8892a4;margin-top:2px;">Automatically detect energy sources, solar forecasts (Solcast/forecast.solar), EV chargers, and heat pumps from your HA configuration</div>
             <div style="font-size:10px;color:#e67e22;margin-top:3px;">⚠️ This will overwrite any manually configured entities. Use the per-section 🔍 buttons below to detect only specific sections.</div>
           </div>
-          <button class="auto-detect-btn" data-key="auto_detect_energy" style="flex-shrink:0;margin-left:12px;padding:8px 16px;background:#00d4b8;color:#1a1f2e;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Detect All</button>
+          <button class="auto-detect-btn" data-key="auto_detect_energy" style="flex-shrink:0;margin-left:12px;padding:8px 16px;background:#f5a623;color:#1a1f2e;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Detect All</button>
         </div>
         <div class="auto-detect-status" style="margin-top:6px;font-size:11px;color:#8892a4;display:none;"></div>
       </div>
       <div class="section">
-        <div class="section-title" style="display:flex;align-items:center;">☀️ Core Power <button class="section-detect-btn" data-section="core_power" title="Auto-detect core power entities">🔍</button></div>
+        <div class="section-title" style="display:flex;align-items:center;">☀️ กำลังไฟหลัก <button class="section-detect-btn" data-section="core_power" title="Auto-detect core power entities">🔍</button></div>
         <div style="font-size:10px;color:#666;margin-bottom:6px;">Real-time power sensors in <b>W</b> or <b>kW</b>. Do not use daily/lifetime kWh energy sensors here.</div>
-        ${this._entityRow('Solar Power', 'solar_power', e)}
-        ${this._entityRow('Home Load', 'load_power', e)}
-        ${this._entityRow('Battery Power', 'battery_power', e)}
-        ${this._entityRow('Battery SoC', 'battery_soc', e)}
-        ${this._entityRow('Battery Capacity', 'battery_capacity', e)}
+        ${this._entityRow('กำลังไฟโซลาร์', 'solar_power', e)}
+        ${this._entityRow('การใช้ไฟในบ้าน', 'load_power', e)}
+        ${this._entityRow('กำลังไฟแบตเตอรี่', 'battery_power', e)}
+        ${this._entityRow('ระดับแบตเตอรี่ (SoC)', 'battery_soc', e)}
+        ${this._entityRow('ความจุแบตเตอรี่', 'battery_capacity', e)}
         <div style="font-size:10px;color:#666;padding:0 0 4px 4px;">Rated capacity sensor (<b>kWh</b>, <b>Wh</b>, or <b>Ah</b>). Used for runtime estimation. Leave blank if you set manual capacity on Features tab.</div>
-        ${this._entityRow('Max SoC Entity', 'battery_max_soc', e)}
-        ${this._entityRow('Min SoC Entity', 'battery_min_soc', e)}
-        ${this._entityRow('Reserved SoC Entity', 'battery_reserved_soc', e)}
+        ${this._entityRow('เอนทิตี SoC สูงสุด', 'battery_max_soc', e)}
+        ${this._entityRow('เอนทิตี SoC ต่ำสุด', 'battery_min_soc', e)}
+        ${this._entityRow('เอนทิตี SoC สำรอง', 'battery_reserved_soc', e)}
         <div style="font-size:10px;color:#666;padding:0 0 4px 4px;">SoC limit entities (typically <b>number.*</b> domain). Max = charge cutoff, Min = discharge cutoff, Reserved = backup reserve for outages. Auto-detected or set manually on the Features → Battery section.</div>
-        ${this._entityRow('Grid Power (live W/kW)', 'grid_power', e)}
+        ${this._entityRow('กำลังไฟกริด (สด W/kW)', 'grid_power', e)}
       </div>
       <div class="section">
-        <div class="section-title" style="display:flex;align-items:center;">📊 Daily Energy <button class="section-detect-btn" data-section="daily_energy" title="Auto-detect daily energy entities">🔍</button></div>
+        <div class="section-title" style="display:flex;align-items:center;">📊 พลังงานรายวัน <button class="section-detect-btn" data-section="daily_energy" title="Auto-detect daily energy entities">🔍</button></div>
         <div style="font-size:10px;color:#666;margin-bottom:6px;">Daily energy counters in <b>kWh</b>. These drive the daily Sankey; do not use live W/kW power sensors here.</div>
-        ${this._entityRow('Solar Energy Today (kWh)', 'solar_energy_today', e)}
-        ${this._entityRow('Load Energy Today (kWh)', 'load_energy_today', e)}
-        ${this._entityRow('Battery Charge Today (kWh)', 'battery_charge_today', e)}
-        ${this._entityRow('Battery Discharge Today (kWh)', 'battery_discharge_today', e)}
+        ${this._entityRow('โซลาร์วันนี้ (kWh)', 'solar_energy_today', e)}
+        ${this._entityRow('ใช้ไฟวันนี้ (kWh)', 'load_energy_today', e)}
+        ${this._entityRow('ชาร์จแบตวันนี้ (kWh)', 'battery_charge_today', e)}
+        ${this._entityRow('จ่ายแบตวันนี้ (kWh)', 'battery_discharge_today', e)}
       </div>
-      <div class="section" style="border:1px solid ${cfg.features?.dual_tariff ? '#00d4b8' : '#2d3451'};border-radius:12px;padding:12px;transition:all 0.3s;">
+      <div class="section" style="border:1px solid ${cfg.features?.dual_tariff ? '#f5a623' : '#2d3451'};border-radius:12px;padding:12px;transition:all 0.3s;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${cfg.features?.dual_tariff ? '12' : '0'}px;">
           <div>
-            <div style="font-size:14px;font-weight:700;color:${cfg.features?.dual_tariff ? '#00d4b8' : '#8892a4'};">⚡ Grid Energy Metering</div>
+            <div style="font-size:14px;font-weight:700;color:${cfg.features?.dual_tariff ? '#f5a623' : '#8892a4'};">⚡ Grid Energy Metering</div>
             <div style="font-size:11px;color:#8892a4;margin-top:2px;">Toggle dual tariff if your smart meter reports separate high/low tariff readings</div>
           </div>
           <div class="switch ${cfg.features?.dual_tariff ? 'on' : 'off'}" data-key="dual_tariff_toggle" style="flex-shrink:0;margin-left:12px;"></div>
@@ -2663,98 +2698,98 @@ class SigenergySettingsCard extends HTMLElement {
         ${cfg.features?.dual_tariff ? `
           <div style="border-top:1px solid rgba(107,127,212,0.2);padding-top:10px;">
             <div class="toggle-desc" style="margin-bottom:8px;color:#8892a4;font-size:11px;">Your smart meter provides separate high and low tariff counters. The dashboard will automatically sum them for daily totals.</div>
-            <div class="section-title" style="font-size:11px;">Import (Grid → Home)</div>
-            ${this._entityRow('Import High Tariff', 'grid_import_high_tariff', e)}
-            ${this._entityRow('Import Low Tariff', 'grid_import_low_tariff', e)}
-            <div class="section-title" style="font-size:11px;margin-top:8px;">Export (Home → Grid)</div>
-            ${this._entityRow('Export High Tariff', 'grid_export_high_tariff', e)}
-            ${this._entityRow('Export Low Tariff', 'grid_export_low_tariff', e)}
+            <div class="section-title" style="font-size:11px;">รับไฟเข้า (กริด → บ้าน)</div>
+            ${this._entityRow('รับเข้า เรตสูง', 'grid_import_high_tariff', e)}
+            ${this._entityRow('รับเข้า เรตต่ำ', 'grid_import_low_tariff', e)}
+            <div class="section-title" style="font-size:11px;margin-top:8px;">ขายไฟออก (บ้าน → กริด)</div>
+            ${this._entityRow('ขายออก เรตสูง', 'grid_export_high_tariff', e)}
+            ${this._entityRow('ขายออก เรตต่ำ', 'grid_export_low_tariff', e)}
           </div>
         ` : `
           <div style="border-top:1px solid rgba(45,52,81,0.5);padding-top:10px;">
             <div class="toggle-desc" style="margin-bottom:8px;color:#8892a4;font-size:11px;">Single daily kWh entities for grid import/export totals. If you only have lifetime counters, use the daily helper prompt.</div>
-            ${this._entityRow('Grid Import Today (kWh)', 'grid_import_today', e)}
-            ${this._entityRow('Grid Export Today (kWh)', 'grid_export_today', e)}
+            ${this._entityRow('รับไฟเข้าวันนี้ (kWh)', 'grid_import_today', e)}
+            ${this._entityRow('ขายไฟออกวันนี้ (kWh)', 'grid_export_today', e)}
           </div>
         `}
       </div>
       <div class="section">
-        <div class="section-title" style="display:flex;align-items:center;">💰 Price Entities <button class="section-detect-btn" data-section="prices" title="Auto-detect price entities">🔍</button></div>
-        <div style="font-size:10px;color:#666;margin-bottom:6px;">Electricity price sensors in <b>${this._esc((cfg.pricing?.currency || '€') + '/kWh')}</b> (or your local currency). Configure source integration on the Pricing tab.</div>
-        ${this._entityRow('Buy Price', 'buy_price', e)}
-        ${this._entityRow('Sell Price', 'sell_price', e)}
+        <div class="section-title" style="display:flex;align-items:center;">💰 เอนทิตีราคา <button class="section-detect-btn" data-section="prices" title="Auto-detect price entities">🔍</button></div>
+        <div style="font-size:10px;color:#666;margin-bottom:6px;">Electricity price sensors in <b>${this._esc((cfg.pricing?.currency || '฿') + '/kWh')}</b> (or your local currency). Configure source integration on the Pricing tab.</div>
+        ${this._entityRow('ราคารับซื้อ', 'buy_price', e)}
+        ${this._entityRow('ราคาขายออก', 'sell_price', e)}
         ${this._entityRow('Nordpool', 'nordpool', e)}
       </div>
-      <div class="section" style="border:1px solid ${emhassOn ? '#00d4b8' : haeoOn ? '#7c4dff' : emOn ? '#ff9800' : '#2d3451'};border-radius:12px;padding:12px;transition:all 0.3s;">
+      <div class="section" style="border:1px solid ${emhassOn ? '#f5a623' : haeoOn ? '#7c4dff' : emOn ? '#ff9800' : '#2d3451'};border-radius:12px;padding:12px;transition:all 0.3s;">
         <div style="margin-bottom:${emhassOn || haeoOn || emOn ? '12' : '0'}px;">
-          <div style="font-size:14px;font-weight:700;color:${emhassOn ? '#00d4b8' : haeoOn ? '#7c4dff' : emOn ? '#ff9800' : '#8892a4'};display:flex;align-items:center;">🤖 Energy Management System (EMS) <button class="section-detect-btn" data-section="ems" title="Auto-detect EMS/HAEO/EMHASS entities" style="margin-left:8px;">🔍</button></div>
+          <div style="font-size:14px;font-weight:700;color:${emhassOn ? '#f5a623' : haeoOn ? '#7c4dff' : emOn ? '#ff9800' : '#8892a4'};display:flex;align-items:center;">🤖 Energy Management System (EMS) <button class="section-detect-btn" data-section="ems" title="Auto-detect EMS/HAEO/EMHASS entities" style="margin-left:8px;">🔍</button></div>
           <div style="font-size:11px;color:#8892a4;margin-top:2px;">Select your energy optimizer. Configure entities below after selecting a provider.</div>
           <div style="display:flex;gap:8px;margin-top:10px;">
             <button class="ems-btn ${emsProvider === 'none' ? 'active' : ''}" data-ems="none" style="flex:1;padding:8px 6px;border:1px solid ${emsProvider === 'none' ? '#8892a4' : '#2d3451'};background:${emsProvider === 'none' ? 'rgba(136,146,164,0.15)' : 'transparent'};color:${emsProvider === 'none' ? '#fff' : '#8892a4'};border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">None</button>
-            <button class="ems-btn ${emhassOn ? 'active' : ''}" data-ems="emhass" style="flex:1;padding:8px 6px;border:1px solid ${emhassOn ? '#00d4b8' : '#2d3451'};background:${emhassOn ? 'rgba(0,212,184,0.15)' : 'transparent'};color:${emhassOn ? '#00d4b8' : '#8892a4'};border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">EMHASS</button>
+            <button class="ems-btn ${emhassOn ? 'active' : ''}" data-ems="emhass" style="flex:1;padding:8px 6px;border:1px solid ${emhassOn ? '#f5a623' : '#2d3451'};background:${emhassOn ? 'rgba(0,212,184,0.15)' : 'transparent'};color:${emhassOn ? '#f5a623' : '#8892a4'};border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">EMHASS</button>
             <button class="ems-btn ${haeoOn ? 'active' : ''}" data-ems="haeo" style="flex:1;padding:8px 6px;border:1px solid ${haeoOn ? '#7c4dff' : '#2d3451'};background:${haeoOn ? 'rgba(124,77,255,0.15)' : 'transparent'};color:${haeoOn ? '#7c4dff' : '#8892a4'};border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">HAEO</button>
             <button class="ems-btn ${emOn ? 'active' : ''}" data-ems="energy_manager" style="flex:1;padding:8px 6px;border:1px solid ${emOn ? '#ff9800' : '#2d3451'};background:${emOn ? 'rgba(255,152,0,0.15)' : 'transparent'};color:${emOn ? '#ff9800' : '#8892a4'};border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">Energy Mgr</button>
           </div>
         </div>
         ${emhassOn ? `
           <div style="border-top:1px solid rgba(0,212,184,0.2);padding-top:10px;">
-            <div class="section-title" style="font-size:11px;">MPC Forecast Entities</div>
+            <div class="section-title" style="font-size:11px;">เอนทิตีพยากรณ์ MPC</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">Core EMHASS sensors with forecast attributes. The V2 card auto-discovers standard names (sensor.p_batt_forecast, sensor.mpc_batt_power, etc.) — only set these if your entities differ.</div>
-            ${this._entityRow('MPC Battery', 'mpc_battery', e)}
-            ${this._entityRow('MPC Grid', 'mpc_grid', e)}
-            ${this._entityRow('MPC PV', 'mpc_pv', e)}
+            ${this._entityRow('MPC แบตเตอรี่', 'mpc_battery', e)}
+            ${this._entityRow('MPC กริด', 'mpc_grid', e)}
+            ${this._entityRow('MPC โซลาร์', 'mpc_pv', e)}
             ${this._entityRow('MPC SoC', 'mpc_soc', e)}
-            ${this._entityRow('MPC Load', 'mpc_load', e)}
-            ${this._entityRow('Optim Status', 'mpc_optim_status', e)}
+            ${this._entityRow('MPC โหลด', 'mpc_load', e)}
+            ${this._entityRow('สถานะ optimize', 'mpc_optim_status', e)}
           </div>
           <div style="margin-top:8px;">
             <div class="section-title" style="font-size:11px;">EMHASS Status</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">Optional — only available if using custom EMHASS integration (sensor.emhass_*). Leave blank for standard EMHASS add-on.</div>
-            ${this._entityRow('Mode', 'emhass_mode', e)}
-            ${this._entityRow('Reason', 'emhass_reason', e)}
-            ${this._entityRow('Battery Action', 'emhass_battery_action', e)}
+            ${this._entityRow('โหมด', 'emhass_mode', e)}
+            ${this._entityRow('เหตุผล', 'emhass_reason', e)}
+            ${this._entityRow('การสั่งงานแบตเตอรี่', 'emhass_battery_action', e)}
           </div>
           <div style="margin-top:8px;">
             <div class="section-title" style="font-size:11px;">EMHASS Financial</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">Optional — only available with custom EMHASS cost tracking sensors. Standard EMHASS users can leave these blank.</div>
-            ${this._entityRow('Savings Today', 'emhass_savings_today', e)}
-            ${this._entityRow('Net Cost Today', 'emhass_net_cost_today', e)}
-            ${this._entityRow('Net Cost Month', 'emhass_net_cost_month', e)}
-            ${this._entityRow('Savings Month', 'emhass_savings_month', e)}
-            ${this._entityRow('Projected Bill', 'emhass_projected_bill', e)}
-            ${this._entityRow('Projected Savings', 'emhass_projected_savings', e)}
-            ${this._entityRow('Last Decision', 'emhass_last_decision', e)}
+            ${this._entityRow('ประหยัดวันนี้', 'emhass_savings_today', e)}
+            ${this._entityRow('ค่าไฟสุทธิวันนี้', 'emhass_net_cost_today', e)}
+            ${this._entityRow('ค่าไฟสุทธิเดือนนี้', 'emhass_net_cost_month', e)}
+            ${this._entityRow('ประหยัดเดือนนี้', 'emhass_savings_month', e)}
+            ${this._entityRow('ประมาณการค่าไฟ', 'emhass_projected_bill', e)}
+            ${this._entityRow('ประมาณการเงินประหยัด', 'emhass_projected_savings', e)}
+            ${this._entityRow('การตัดสินใจล่าสุด', 'emhass_last_decision', e)}
           </div>
           <div style="margin-top:8px;">
             <div class="section-title" style="font-size:11px;">EMHASS Automations</div>
-            ${this._entityRow('MPC Optimizer', 'automation_mpc_optimizer', e)}
-            ${this._entityRow('Battery Control', 'automation_battery_control', e)}
+            ${this._entityRow('ตัวจัดการ MPC', 'automation_mpc_optimizer', e)}
+            ${this._entityRow('ควบคุมแบตเตอรี่', 'automation_battery_control', e)}
           </div>
           <div style="margin-top:8px;">
-            <div class="section-title" style="font-size:11px;">Actual Price Entities</div>
+            <div class="section-title" style="font-size:11px;">เอนทิตีราคาจริง</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">Live electricity prices for chart overlays and cost tracking</div>
-            ${this._entityRow('Import Price', 'current_import_price', e)}
-            ${this._entityRow('Export Price', 'current_export_price', e)}
-            ${this._entityRow('MPC Cost Fun', 'mpc_cost_fun', e)}
+            ${this._entityRow('ราคารับซื้อ', 'current_import_price', e)}
+            ${this._entityRow('ราคาขายออก', 'current_export_price', e)}
+            ${this._entityRow('MPC ฟังก์ชันต้นทุน', 'mpc_cost_fun', e)}
           </div>
           <div style="margin-top:8px;">
             <div class="section-title" style="font-size:11px;">Additional Financial</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">Optional — advanced cost tracking entities. Only available if using custom EMHASS templates (e.g. for detailed bill projections).</div>
-            ${this._entityRow('Export Earn Daily', 'emhass_export_earnings_daily', e)}
-            ${this._entityRow('Import Cost Daily', 'emhass_import_cost_daily', e)}
-            ${this._entityRow('Grid-Only Cost', 'emhass_grid_only_cost_daily', e)}
-            ${this._entityRow('Bill w/o Optim', 'emhass_projected_bill_without_opt', e)}
+            ${this._entityRow('รายได้ขายไฟรายวัน', 'emhass_export_earnings_daily', e)}
+            ${this._entityRow('ค่าไฟที่ซื้อรายวัน', 'emhass_import_cost_daily', e)}
+            ${this._entityRow('ค่าไฟแบบใช้กริดล้วน', 'emhass_grid_only_cost_daily', e)}
+            ${this._entityRow('ค่าไฟ (ไม่ optimize)', 'emhass_projected_bill_without_opt', e)}
           </div>
           ${cfg.features?.deferrable_loads ? `
           <div style="margin-top:8px;">
             <div class="section-title" style="font-size:11px;">Deferrable Loads</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">EMHASS deferrable load scheduling (heat pump, boiler, etc.)</div>
-            ${this._entityRow('Deferrable 0', 'mpc_deferrable0', e)}
-            <div class="row"><span class="row-label">Label 0</span><input class="row-input" value="${this._esc(e.deferrable0_label||'Heat Pump')}" data-key="deferrable0_label" /><span class="row-state" style="min-width:40px;"></span></div>
-            ${this._entityRow('Actual Power 0', 'deferrable0_power', e)}
-            ${this._entityRow('Deferrable 1', 'mpc_deferrable1', e)}
-            <div class="row"><span class="row-label">Label 1</span><input class="row-input" value="${this._esc(e.deferrable1_label||'Boiler')}" data-key="deferrable1_label" /><span class="row-state" style="min-width:40px;"></span></div>
-            ${this._entityRow('Actual Power 1', 'deferrable1_power', e)}
+            ${this._entityRow('โหลดเลื่อนได้ 0', 'mpc_deferrable0', e)}
+            <div class="row"><span class="row-label">ชื่อ 0</span><input class="row-input" value="${this._esc(e.deferrable0_label||'ปั๊มความร้อน')}" data-key="deferrable0_label" /><span class="row-state" style="min-width:40px;"></span></div>
+            ${this._entityRow('กำลังไฟจริง 0', 'deferrable0_power', e)}
+            ${this._entityRow('โหลดเลื่อนได้ 1', 'mpc_deferrable1', e)}
+            <div class="row"><span class="row-label">ชื่อ 1</span><input class="row-input" value="${this._esc(e.deferrable1_label||'หม้อต้มน้ำ')}" data-key="deferrable1_label" /><span class="row-state" style="min-width:40px;"></span></div>
+            ${this._entityRow('กำลังไฟจริง 1', 'deferrable1_power', e)}
           </div>
           ` : ''}
         ` : ''}
@@ -2763,49 +2798,49 @@ class SigenergySettingsCard extends HTMLElement {
             <div style="font-size:10px;color:#666;margin-bottom:8px;">Requires the <a href="https://github.com/hass-energy/haeo" target="_blank" style="color:#7c4dff;">HAEO integration</a> (HACS). Sensors are named <b>sensor.{element_name}_{type}</b>.</div>
             <div class="section-title" style="font-size:11px;">HAEO Schedule Entities</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">Optimization output sensors — each includes a <code>forecast</code> attribute with future schedule</div>
-            ${this._entityRow('Battery Charge', 'haeo_battery_charge', e)}
+            ${this._entityRow('ชาร์จแบตเตอรี่', 'haeo_battery_charge', e)}
             <div style="font-size:9px;color:#666;padding:0 0 4px 4px;">sensor.{battery_name}_power_consumed — optimal charge power (kW)</div>
-            ${this._entityRow('Battery Discharge', 'haeo_battery_discharge', e)}
+            ${this._entityRow('จ่ายแบตเตอรี่', 'haeo_battery_discharge', e)}
             <div style="font-size:9px;color:#666;padding:0 0 4px 4px;">sensor.{battery_name}_power_produced — optimal discharge power (kW)</div>
-            ${this._entityRow('Battery SoC', 'haeo_battery_soc', e)}
+            ${this._entityRow('ระดับแบตเตอรี่ (SoC)', 'haeo_battery_soc', e)}
             <div style="font-size:9px;color:#666;padding:0 0 4px 4px;">sensor.{battery_name}_soc — planned state of charge (%)</div>
-            ${this._entityRow('Grid Power', 'haeo_grid_power', e)}
-            ${this._entityRow('Solar Power', 'haeo_solar_power', e)}
-            ${this._entityRow('Load Power', 'haeo_load_power', e)}
+            ${this._entityRow('กำลังไฟกริด', 'haeo_grid_power', e)}
+            ${this._entityRow('กำลังไฟโซลาร์', 'haeo_solar_power', e)}
+            ${this._entityRow('กำลังการใช้ไฟ', 'haeo_load_power', e)}
           </div>
           <div style="margin-top:8px;">
             <div class="section-title" style="font-size:11px;">HAEO Network Status</div>
-            ${this._entityRow('Optim Status', 'haeo_optim_status', e)}
+            ${this._entityRow('สถานะ optimize', 'haeo_optim_status', e)}
             <div style="font-size:9px;color:#666;padding:0 0 4px 4px;">sensor.{network_name}_network_optimization_status — success / failed / pending</div>
-            ${this._entityRow('Optim Cost', 'haeo_optim_cost', e)}
-            ${this._entityRow('Optim Duration', 'haeo_optim_duration', e)}
+            ${this._entityRow('ต้นทุน optimize', 'haeo_optim_cost', e)}
+            ${this._entityRow('ระยะเวลา optimize', 'haeo_optim_duration', e)}
           </div>
           <div style="margin-top:8px;">
-            <div class="section-title" style="font-size:11px;">Price Entities</div>
+            <div class="section-title" style="font-size:11px;">เอนทิตีราคา</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">Live electricity prices for chart overlays (shared with EMHASS)</div>
-            ${this._entityRow('Import Price', 'current_import_price', e)}
-            ${this._entityRow('Export Price', 'current_export_price', e)}
+            ${this._entityRow('ราคารับซื้อ', 'current_import_price', e)}
+            ${this._entityRow('ราคาขายออก', 'current_export_price', e)}
             <div class="toggle-desc" style="margin-top:6px;margin-bottom:4px;color:#8892a4;font-size:10px;">HAEO price forecast entities — with <code>forecast</code> attribute for timeline table</div>
-            ${this._entityRow('Import Price Forecast', 'haeo_import_price', e)}
+            ${this._entityRow('พยากรณ์ราคาซื้อ', 'haeo_import_price', e)}
             <div style="font-size:9px;color:#666;padding:0 0 4px 4px;">number.grid_import_price — includes forecast attribute with future import prices</div>
-            ${this._entityRow('Export Price Forecast', 'haeo_export_price', e)}
+            ${this._entityRow('พยากรณ์ราคาขาย', 'haeo_export_price', e)}
             <div style="font-size:9px;color:#666;padding:0 0 4px 4px;">number.grid_export_price — includes forecast attribute with future export prices</div>
           </div>
         ` : ''}
         ${emOn ? `
           <div style="border-top:1px solid rgba(255,152,0,0.2);padding-top:10px;">
             <div style="font-size:10px;color:#666;margin-bottom:8px;">Requires the <a href="https://github.com/Roving-Ronin/myHomeAssistant" target="_blank" style="color:#ff9800;">Energy Manager</a> Node-RED flow. Uses <b>sensor.energy_manager_plan</b> and Sigenergy inverter sensors.</div>
-            <div class="section-title" style="font-size:11px;">Core Entities</div>
+            <div class="section-title" style="font-size:11px;">เอนทิตีหลัก</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">The EM card uses hardcoded Sigenergy sensor names. Override if your entity IDs differ.</div>
-            ${this._entityRow('EM Decision', 'em_decision', e)}
+            ${this._entityRow('การตัดสินใจ EM', 'em_decision', e)}
             <div style="font-size:9px;color:#666;padding:0 0 4px 4px;">sensor.energy_manager_decision — current operating mode</div>
           </div>
           <div style="margin-top:8px;">
-            <div class="section-title" style="font-size:11px;">Price Entities</div>
+            <div class="section-title" style="font-size:11px;">เอนทิตีราคา</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">Node-RED buy/sell price sensors for cost tracking</div>
-            ${this._entityRow('Buy Price', 'em_buy_price', e)}
+            ${this._entityRow('ราคารับซื้อ', 'em_buy_price', e)}
             <div style="font-size:9px;color:#666;padding:0 0 4px 4px;">sensor.nodered_buyprice — current buy price from your provider</div>
-            ${this._entityRow('Sell Price', 'em_sell_price', e)}
+            ${this._entityRow('ราคาขายออก', 'em_sell_price', e)}
             <div style="font-size:9px;color:#666;padding:0 0 4px 4px;">sensor.nodered_sellprice — current sell/feed-in price</div>
           </div>
         ` : ''}
@@ -2816,10 +2851,10 @@ class SigenergySettingsCard extends HTMLElement {
           <button class="auto-detect-btn" data-key="auto_detect_ev" style="flex-shrink:0;padding:6px 12px;background:#E8705A;color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;" title="Auto-detect EV charger power/state, vehicle SoC/range, and EV energy">🔍 Detect EV</button>
         </div>
         <div class="ev-detect-status" style="font-size:10px;color:#8892a4;display:none;margin-bottom:6px;"></div>
-        ${this._entityRow('Charger Power', 'ev_charger_power', e)}
-        ${this._entityRow('Charger State', 'ev_charger_state', e)}
-        ${this._entityRow('EV SoC', 'ev_soc', e)}
-        ${this._entityRow('EV Range', 'ev_range', e)}
+        ${this._entityRow('กำลังที่ชาร์จ', 'ev_charger_power', e)}
+        ${this._entityRow('สถานะที่ชาร์จ', 'ev_charger_state', e)}
+        ${this._entityRow('แบตเตอรี่รถ EV', 'ev_soc', e)}
+        ${this._entityRow('ระยะวิ่งรถ EV', 'ev_range', e)}
         <div style="margin-top:8px;border-top:1px solid rgba(155,89,182,0.2);padding-top:8px;">
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div>
@@ -2831,7 +2866,7 @@ class SigenergySettingsCard extends HTMLElement {
           ${cfg.features?.show_ev_in_sankey ? `
             <div style="margin-top:8px;">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                <div style="flex:1;">${this._entityRow('EV Energy Today', 'ev_energy_today', e)}</div>
+                <div style="flex:1;">${this._entityRow('พลังงานชาร์จรถวันนี้', 'ev_energy_today', e)}</div>
                 <button class="auto-detect-btn" data-key="auto_detect_ev" style="flex-shrink:0;padding:6px 12px;background:#E8705A;color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;" title="Auto-detect from HA Energy Dashboard device list">🔍 Detect</button>
               </div>
               <div class="ev-detect-status" style="font-size:10px;color:#8892a4;display:none;margin-bottom:4px;"></div>
@@ -2839,7 +2874,7 @@ class SigenergySettingsCard extends HTMLElement {
                 <div style="background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.3);border-radius:8px;padding:8px;margin-bottom:6px;">
                   <div style="font-size:10px;font-weight:600;color:#E8705A;">📊 Cumulative sensor detected</div>
                   <div style="font-size:10px;color:#8892a4;margin-top:2px;">Source entity tracks lifetime total. ${e.ev_energy_daily_meter ? 'Using daily utility meter: <b>' + e.ev_energy_daily_meter + '</b>' : 'No daily meter configured yet — click Detect to auto-create one.'}</div>
-                  ${e.ev_energy_daily_meter ? this._entityRow('Daily Meter', 'ev_energy_daily_meter', e) : ''}
+                  ${e.ev_energy_daily_meter ? this._entityRow('มิเตอร์รายวัน', 'ev_energy_daily_meter', e) : ''}
                 </div>
               ` : ''}
               <div class="toggle-desc" style="color:#8892a4;font-size:10px;">Daily EV charging energy (kWh). Click Detect to scan your HA Energy Dashboard — if a cumulative sensor is found, a daily utility meter will be auto-created.</div>
@@ -2848,8 +2883,8 @@ class SigenergySettingsCard extends HTMLElement {
         </div>
       </div>
       <div class="section" style="border:1px solid ${cfg.features?.show_hp_in_sankey ? '#e67e22' : '#2d3451'};border-radius:12px;padding:12px;transition:all 0.3s;">
-        <div class="section-title">♨️ Heat Pump / HVAC</div>
-        ${this._entityRow('HP Power', 'heat_pump_power', e)}
+        <div class="section-title">♨️ ปั๊มความร้อน / HVAC</div>
+        ${this._entityRow('กำลังไฟปั๊มความร้อน', 'heat_pump_power', e)}
         <div style="margin-top:8px;border-top:1px solid rgba(230,126,34,0.2);padding-top:8px;">
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div>
@@ -2861,7 +2896,7 @@ class SigenergySettingsCard extends HTMLElement {
           ${cfg.features?.show_hp_in_sankey ? `
             <div style="margin-top:8px;">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                <div style="flex:1;">${this._entityRow('HP Energy Today', 'heat_pump_energy_today', e)}</div>
+                <div style="flex:1;">${this._entityRow('พลังงานปั๊มความร้อนวันนี้', 'heat_pump_energy_today', e)}</div>
                 <button class="auto-detect-btn" data-key="auto_detect_hp" style="flex-shrink:0;padding:6px 12px;background:#e67e22;color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;" title="Auto-detect from HA Energy Dashboard device list">🔍 Detect</button>
               </div>
               <div class="hp-detect-status" style="font-size:10px;color:#8892a4;display:none;margin-bottom:4px;"></div>
@@ -2869,7 +2904,7 @@ class SigenergySettingsCard extends HTMLElement {
                 <div style="background:rgba(230,126,34,0.1);border:1px solid rgba(230,126,34,0.3);border-radius:8px;padding:8px;margin-bottom:6px;">
                   <div style="font-size:10px;font-weight:600;color:#e67e22;">📊 Cumulative sensor detected</div>
                   <div style="font-size:10px;color:#8892a4;margin-top:2px;">Source entity tracks lifetime total. ${e.hp_energy_daily_meter ? 'Using daily utility meter: <b>' + e.hp_energy_daily_meter + '</b>' : 'No daily meter configured yet — click Detect to auto-create one.'}</div>
-                  ${e.hp_energy_daily_meter ? this._entityRow('Daily Meter', 'hp_energy_daily_meter', e) : ''}
+                  ${e.hp_energy_daily_meter ? this._entityRow('มิเตอร์รายวัน', 'hp_energy_daily_meter', e) : ''}
                 </div>
               ` : ''}
               <div class="toggle-desc" style="color:#8892a4;font-size:10px;">Daily heat pump energy (kWh). Click Detect to scan your HA Energy Dashboard — if a cumulative sensor is found, a daily utility meter will be auto-created.</div>
@@ -2898,22 +2933,22 @@ class SigenergySettingsCard extends HTMLElement {
           <div style="border-top:1px solid rgba(255,165,0,0.2);padding-top:10px;">
             <div class="section-title" style="font-size:11px;">Solcast Entities</div>
             <div class="toggle-desc" style="margin-bottom:4px;color:#8892a4;font-size:10px;">Install the Solcast PV Forecast integration from HACS for these entities</div>
-            ${this._entityRow('Today kWh', 'solcast_today', e)}
-            ${this._entityRow('Tomorrow kWh', 'solcast_tomorrow', e)}
-            ${this._entityRow('Remaining kWh', 'solcast_remaining', e)}
-            ${this._entityRow('Forecast Power', 'solcast_forecast_power', e)}
-            <div style="margin-top:8px;"><div class="section-title" style="font-size:11px;">Forecast.Solar (alternative)</div></div>
-            ${this._entityRow('Today kWh', 'forecast_solar_today', e)}
+            ${this._entityRow('วันนี้ (kWh)', 'solcast_today', e)}
+            ${this._entityRow('พรุ่งนี้ (kWh)', 'solcast_tomorrow', e)}
+            ${this._entityRow('พลังงานคงเหลือ (kWh)', 'solcast_remaining', e)}
+            ${this._entityRow('กำลังพยากรณ์', 'solcast_forecast_power', e)}
+            <div style="margin-top:8px;"><div class="section-title" style="font-size:11px;">Forecast.Solar (ทางเลือก)</div></div>
+            ${this._entityRow('วันนี้ (kWh)', 'forecast_solar_today', e)}
           </div>
         ` : ''}
       </div>
       <div class="section">
         <div class="section-title" style="display:flex;align-items:center;">🌡️ System <button class="section-detect-btn" data-section="system" title="Auto-detect system entities">🔍</button></div>
         <div style="font-size:10px;color:#666;margin-bottom:6px;">Temperature (<b>°C</b>), voltage (<b>V</b>), and frequency (<b>Hz</b>) sensors. Found in <i>HA → Settings → Devices</i>.</div>
-        ${this._entityRow('Weather', 'weather', e)}
-        ${this._entityRow('Inverter Temp', 'inverter_temp', e)}
-        ${this._entityRow('Inv Internal Temp', 'inverter_internal_temp', e)}
-        ${this._entityRow('Battery Temp', 'battery_temp', e)}
+        ${this._entityRow('สภาพอากาศ', 'weather', e)}
+        ${this._entityRow('อุณหภูมิอินเวอร์เตอร์', 'inverter_temp', e)}
+        ${this._entityRow('อุณหภูมิภายในอินเวอร์เตอร์', 'inverter_internal_temp', e)}
+        ${this._entityRow('อุณหภูมิแบตเตอรี่', 'battery_temp', e)}
         <div style="border:1px solid ${cfg.features?.three_phase ? '#F0D850' : '#2d3451'};border-radius:10px;padding:10px;margin:8px 0;transition:all 0.3s;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${cfg.features?.three_phase ? '8' : '0'}px;">
             <div>
@@ -2924,41 +2959,41 @@ class SigenergySettingsCard extends HTMLElement {
           </div>
           ${cfg.features?.three_phase ? `
             <div style="border-top:1px solid rgba(200,184,74,0.2);padding-top:8px;">
-              ${this._entityRow('Voltage L1', 'grid_voltage', e)}
-              ${this._entityRow('Voltage L2', 'grid_voltage_l2', e)}
-              ${this._entityRow('Voltage L3', 'grid_voltage_l3', e)}
+              ${this._entityRow('แรงดัน L1', 'grid_voltage', e)}
+              ${this._entityRow('แรงดัน L2', 'grid_voltage_l2', e)}
+              ${this._entityRow('แรงดัน L3', 'grid_voltage_l3', e)}
             </div>
           ` : `
             <div style="border-top:1px solid rgba(45,52,81,0.5);padding-top:8px;">
-              ${this._entityRow('Grid Voltage', 'grid_voltage', e)}
+              ${this._entityRow('แรงดันไฟกริด', 'grid_voltage', e)}
             </div>
           `}
         </div>
-        ${this._entityRow('Grid Frequency', 'grid_frequency', e)}
-        ${this._entityRow('Grid CT Clamp', 'grid_power_ct', e)}
-        ${this._entityRow('Net Grid Power', 'grid_active_power', e)}
-        ${emhassOn ? this._entityRow('EMHASS Enabled', 'emhass_enabled', e) : ''}
+        ${this._entityRow('ความถี่ไฟกริด', 'grid_frequency', e)}
+        ${this._entityRow('แคลมป์ CT กริด', 'grid_power_ct', e)}
+        ${this._entityRow('กำลังไฟกริดสุทธิ', 'grid_active_power', e)}
+        ${emhassOn ? this._entityRow('เปิดใช้ EMHASS', 'emhass_enabled', e) : ''}
       </div>
       <div class="section">
         <div class="section-title">🔌 Inverter & PV</div>
         <div style="font-size:10px;color:#666;margin-bottom:6px;">Power sensors in <b>W</b> or <b>kW</b>. Individual PV string monitoring for detailed solar analysis.</div>
-        ${this._entityRow('Inverter Output', 'inverter_output_power', e)}
-        ${this._entityRow('Inverter Rated', 'inverter_rated_power', e)}
-        ${this._entityRow('Rated Power', 'rated_power', e)}
+        ${this._entityRow('กำลังออกอินเวอร์เตอร์', 'inverter_output_power', e)}
+        ${this._entityRow('พิกัดอินเวอร์เตอร์', 'inverter_rated_power', e)}
+        ${this._entityRow('กำลังพิกัด', 'rated_power', e)}
         <div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px;">
           <span style="font-size:12px;font-weight:600;color:#F0D850;">☀️ PV Strings</span>
           <select class="pv-strings-select" data-key="pv_strings" style="background:var(--card-background-color,#1a1f2e);color:var(--primary-text-color,#e0e6f0);border:1px solid var(--divider-color,#2d3451);border-radius:6px;padding:3px 8px;font-size:11px;">
             ${[1,2,3,4,5,6].map(n => `<option value="${n}" ${(cfg.features?.pv_strings || 2) == n ? 'selected' : ''}>${n} string${n > 1 ? 's' : ''}</option>`).join('')}
           </select>
         </div>
-        ${Array.from({length: cfg.features?.pv_strings || 2}, (_, i) => this._entityRow('PV' + (i+1) + ' Power', 'pv' + (i+1) + '_power', e)).join('\n        ')}
+        ${Array.from({length: cfg.features?.pv_strings || 2}, (_, i) => this._entityRow('โซลาร์ (PV)' + (i+1) + ' Power', 'pv' + (i+1) + '_power', e)).join('\n        ')}
       </div>
       <div class="section">
-        <div class="section-title">🔋 Battery System</div>
+        <div class="section-title">🔋 ระบบแบตเตอรี่</div>
         <div class="toggle-desc" style="margin-bottom:8px;color:#8892a4;font-size:11px;">Battery voltage, current, and individual pack SoC sensors. Leave pack SoC blank to use the main Battery SoC entity as fallback.</div>
-        ${this._entityRow('Battery Voltage', 'battery_voltage', e)}
-        ${this._entityRow('Battery Current', 'battery_current', e)}
-        ${Array.from({length: Math.min(cfg.features?.battery_packs || 2, 8)}, (_, i) => this._entityRow('Pack ' + (i+1) + ' SoC', 'battery_pack' + (i+1) + '_soc', e)).join('\n        ')}
+        ${this._entityRow('แรงดันแบตเตอรี่', 'battery_voltage', e)}
+        ${this._entityRow('กระแสไฟแบตเตอรี่', 'battery_current', e)}
+        ${Array.from({length: Math.min(cfg.features?.battery_packs || 2, 8)}, (_, i) => this._entityRow('แพ็ก ' + (i+1) + ' SoC', 'battery_pack' + (i+1) + '_soc', e)).join('\n        ')}
       </div>
     `;
 
@@ -3060,7 +3095,7 @@ class SigenergySettingsCard extends HTMLElement {
             // Try to force-initialize the utility meter by updating the source entity
             try { await this._hass.callService('homeassistant', 'update_entity', { entity_id: source }); } catch(e) {}
             btn.textContent = '✓ Created: ' + result.dailyEntity;
-            btn.style.background = '#00d4b8';
+            btn.style.background = '#f5a623';
             const infoDiv = document.createElement('div');
             infoDiv.style.cssText = 'font-size:10px;color:#8892a4;margin-top:4px;';
             infoDiv.textContent = 'ℹ️ Helper may show "unknown" until the source sensor updates (usually within minutes). This is normal.';
@@ -3071,7 +3106,7 @@ class SigenergySettingsCard extends HTMLElement {
             btn.style.background = '#8892a4';
           }
         } catch (err) {
-          btn.textContent = '❌ Failed: ' + (err.message || 'Unknown error');
+          btn.textContent = '❌ ไม่สำเร็จ: ' + (err.message || 'Unknown error');
           btn.style.background = '#e74c3c';
         }
       });
@@ -3179,21 +3214,21 @@ class SigenergySettingsCard extends HTMLElement {
     evDetectButtons.forEach(evDetectBtn => {
       evDetectBtn.addEventListener('click', async () => {
         const statusEl = el.querySelector('.ev-detect-status');
-        if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '⏳ Scanning HA Energy Dashboard and state registry for EV/charger entities...'; }
+        if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '⏳ กำลังค้นหาเอนทิตี EV/ที่ชาร์จจาก Energy Dashboard และ state registry...'; }
         try {
           const prefs = await this._hass.callWS({ type: 'energy/get_prefs' });
           const cfg2 = this._storeGet();
           const found = [];
           const count = await this._autoDetectEvEntities(cfg2, found, prefs);
           if (count > 0) {
-            if (statusEl) statusEl.innerHTML = '✅ Found EV/charger entities:<br>• ' + found.join('<br>• ');
+            if (statusEl) statusEl.innerHTML = '✅ พบเอนทิตี EV/ที่ชาร์จ:<br>• ' + found.join('<br>• ');
             if (this._hass) await this._buildDashboard();
             setTimeout(() => this._render(), 500);
           } else {
-            if (statusEl) statusEl.textContent = '⚠️ No EV/charger entities found in HA Energy Dashboard or state registry. Configure manually.';
+            if (statusEl) statusEl.textContent = '⚠️ ไม่พบเอนทิตี EV/ที่ชาร์จใน Energy Dashboard หรือ state registry กรุณาตั้งค่าเอง';
           }
         } catch (err) {
-          if (statusEl) statusEl.textContent = '❌ Detection failed: ' + (err.message || 'unknown error');
+          if (statusEl) statusEl.textContent = '❌ ค้นหาไม่สำเร็จ: ' + (err.message || 'unknown error');
         }
       });
     });
@@ -3203,7 +3238,7 @@ class SigenergySettingsCard extends HTMLElement {
     if (hpDetectBtn) {
       hpDetectBtn.addEventListener('click', async () => {
         const statusEl = el.querySelector('.hp-detect-status');
-        if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '⏳ Scanning HA Energy Dashboard for Heat Pump/HVAC devices...'; }
+        if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '⏳ กำลังค้นหาอุปกรณ์ปั๊มความร้อน/HVAC จาก Energy Dashboard...'; }
         try {
           const prefs = await this._hass.callWS({ type: 'energy/get_prefs' });
           const devs = prefs?.device_consumption || [];
@@ -3217,7 +3252,7 @@ class SigenergySettingsCard extends HTMLElement {
           if (hpDevices.length > 0) {
             foundEntity = hpDevices[0].stat_consumption;
             const list = hpDevices.map(d => '• ' + d.name + ' → ' + d.stat_consumption).join('<br>');
-            if (statusEl) statusEl.innerHTML = '✅ Found ' + hpDevices.length + ' Heat Pump device(s):<br>' + list;
+            if (statusEl) statusEl.innerHTML = '✅ พบ ' + hpDevices.length + ' Heat Pump device(s):<br>' + list;
           } else {
             // Fallback: scan all HA states for HP-related energy sensors
             const hpStates = Object.keys(this._hass.states).filter(k =>
@@ -3226,12 +3261,12 @@ class SigenergySettingsCard extends HTMLElement {
             );
             if (hpStates.length > 0) {
               foundEntity = hpStates[0];
-              if (statusEl) statusEl.innerHTML = '✅ Found HP energy sensor: ' + hpStates[0];
+              if (statusEl) statusEl.innerHTML = '✅ พบเซ็นเซอร์พลังงานปั๊มความร้อน: ' + hpStates[0];
             }
           }
           if (foundEntity) {
             // Check if cumulative and create utility meter if needed
-            if (statusEl) statusEl.innerHTML += '<br>⏳ Checking if sensor is cumulative...';
+            if (statusEl) statusEl.innerHTML += '<br>⏳ กำลังตรวจสอบว่าเซ็นเซอร์เป็นค่าสะสมหรือไม่...';
             const result = await this._ensureDailyMeter(foundEntity, 'hp_energy');
             const cfg2 = this._storeGet();
             cfg2.entities.heat_pump_energy_today = foundEntity;
@@ -3240,17 +3275,17 @@ class SigenergySettingsCard extends HTMLElement {
               cfg2.entities.hp_energy_daily_meter = result.dailyEntity;
               if (statusEl) statusEl.innerHTML += '<br>📊 Entity is cumulative (total: ' + this._hass.states[foundEntity]?.state + ' kWh). Created daily utility meter: <b>' + result.dailyEntity + '</b>';
             } else if (result.isCumulative) {
-              if (statusEl) statusEl.innerHTML += '<br>⚠️ Entity is cumulative but utility meter creation failed. You can create one manually in HA Settings → Helpers.';
+              if (statusEl) statusEl.innerHTML += '<br>⚠️ เอนทิตีเป็นค่าสะสมแต่สร้างมิเตอร์รายวันไม่สำเร็จ คุณสร้างเองได้ที่ การตั้งค่า → ตัวช่วย (Helpers)';
             } else {
-              if (statusEl) statusEl.innerHTML += '<br>✅ Entity reports daily values — using directly.';
+              if (statusEl) statusEl.innerHTML += '<br>✅ เอนทิตีรายงานค่ารายวัน — ใช้ได้โดยตรง';
             }
             this._storeSave(cfg2);
             setTimeout(() => this._render(), 500);
           } else {
-            if (statusEl) statusEl.textContent = '⚠️ No Heat Pump/HVAC device found in HA Energy Dashboard or state registry. Configure manually.';
+            if (statusEl) statusEl.textContent = '⚠️ ไม่พบอุปกรณ์ปั๊มความร้อน/HVAC ใน Energy Dashboard หรือ state registry กรุณาตั้งค่าเอง';
           }
         } catch (err) {
-          if (statusEl) statusEl.textContent = '❌ Detection failed: ' + (err.message || 'unknown error');
+          if (statusEl) statusEl.textContent = '❌ ค้นหาไม่สำเร็จ: ' + (err.message || 'unknown error');
         }
       });
     }
@@ -3260,11 +3295,11 @@ class SigenergySettingsCard extends HTMLElement {
     if (autoDetectBtn) {
       autoDetectBtn.addEventListener('click', async () => {
         const statusEl = el.querySelector('.auto-detect-status');
-        if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '⏳ Fetching HA Energy Dashboard config...'; }
+        if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '⏳ กำลังดึงการตั้งค่า Energy Dashboard...'; }
         try {
           const prefs = await this._hass.callWS({ type: 'energy/get_prefs' });
           if (!prefs || !prefs.energy_sources) {
-            if (statusEl) statusEl.textContent = '❌ No energy sources configured in HA Energy Dashboard';
+            if (statusEl) statusEl.textContent = '❌ ยังไม่ได้ตั้งค่าแหล่งพลังงานใน Energy Dashboard ของ HA';
             return;
           }
           const cfg2 = this._storeGet();
@@ -3503,7 +3538,7 @@ class SigenergySettingsCard extends HTMLElement {
             // Auto-set currency for known providers
             if (cfg2.entities.buy_price && cfg2.entities.buy_price.includes('amber')) {
               if (!cfg2.pricing) cfg2.pricing = {};
-              if (cfg2.pricing.currency === '€' || !cfg2.pricing.currency) {
+              if (cfg2.pricing.currency === '฿' || !cfg2.pricing.currency) {
                 cfg2.pricing.currency = '$';
                 cfg2.pricing.source = 'amber';
                 found.push('✓ Currency set to $ (Amber Electric)');
@@ -4251,7 +4286,7 @@ class SigenergySettingsCard extends HTMLElement {
               if (sellCandidates.length > 1) this._candidates.sell_price = sellCandidates;
               // Auto-set currency for Amber
               if (cfg2.entities.buy_price && cfg2.entities.buy_price.includes('amber')) {
-                if (cfg2.pricing.currency === '€' || !cfg2.pricing.currency) {
+                if (cfg2.pricing.currency === '฿' || !cfg2.pricing.currency) {
                   cfg2.pricing.currency = '$';
                   cfg2.pricing.source = 'amber';
                   found.push('✓ Amber Electric detected — currency set to $');
@@ -4262,23 +4297,23 @@ class SigenergySettingsCard extends HTMLElement {
               if (weatherC.length > 1) this._candidates.weather = weatherC;
             } catch (e) { /* non-critical */ }
 
-            if (statusEl) statusEl.innerHTML = '✅ Detected ' + found.length + ' entities:<br>' + found.map(f => '• ' + f).join('<br>');
+            if (statusEl) statusEl.innerHTML = '✅ ตรวจพบ ' + found.length + ' entities:<br>' + found.map(f => '• ' + f).join('<br>');
             // Auto-apply detected entities to dashboard so house card and overview immediately work
             try {
               await this._buildDashboard();
-              if (statusEl) statusEl.innerHTML += '<br><br>✅ Dashboard auto-rebuilt with detected entities. <b>Refresh the page</b> to see changes.';
+              if (statusEl) statusEl.innerHTML += '<br><br>✅ สร้างแดชบอร์ดใหม่พร้อมเอนทิตีที่พบแล้ว <b>รีเฟรชหน้า</b> เพื่อดูผล';
             } catch (buildErr) {
-              if (statusEl) statusEl.innerHTML += '<br><br>⚠️ Auto-rebuild failed — click "Apply Settings to Dashboard" manually.';
+              if (statusEl) statusEl.innerHTML += '<br><br>⚠️ สร้างใหม่อัตโนมัติไม่สำเร็จ — กด "ใช้การตั้งค่ากับแดชบอร์ด" เอง';
               console.warn('Auto-build after detect failed:', buildErr);
             }
             // Re-render to show detected entities
             setTimeout(() => this._render(), 500);
           } else {
-            if (statusEl) statusEl.textContent = '⚠️ No matching entities found in your HA Energy Dashboard';
+            if (statusEl) statusEl.textContent = '⚠️ ไม่พบเอนทิตีที่ตรงกันใน Energy Dashboard ของคุณ';
           }
         } catch (err) {
           console.error('Auto-detect failed:', err);
-          if (statusEl) statusEl.textContent = '❌ Failed to fetch Energy Dashboard config: ' + (err.message || 'unknown error');
+          if (statusEl) statusEl.textContent = '❌ ดึงการตั้งค่า Energy Dashboard ไม่สำเร็จ: ' + (err.message || 'unknown error');
         }
       });
     }
@@ -4650,7 +4685,7 @@ class SigenergySettingsCard extends HTMLElement {
     // Auto-set currency to AUD if Amber detected
     if (cfg2.entities.buy_price && cfg2.entities.buy_price.includes('amber')) {
       if (!cfg2.pricing) cfg2.pricing = {};
-      if (cfg2.pricing.currency === '€' || !cfg2.pricing.currency) {
+      if (cfg2.pricing.currency === '฿' || !cfg2.pricing.currency) {
         cfg2.pricing.currency = '$';
         cfg2.pricing.source = 'amber';
         found.push('✓ Amber Electric detected — currency set to $');
@@ -4866,69 +4901,69 @@ class SigenergySettingsCard extends HTMLElement {
         </div>
       </div>
       <div class="section">
-        <div class="section-title">🏠 System Components</div>
-        ${this._toggleHtml('Grid Connection', 'Disable for off-grid / island setups', 'grid_connection', f.grid_connection)}
-        ${this._toggleHtml('Weather Widget', 'Show weather overlay on the Overview page', 'weather_widget', f.weather_widget)}
-        ${this._toggleHtml('Hide Cable Lines', 'Show only animated flow dots, hide the static cable backbone on the house card', 'hide_cables', f.hide_cables)}
+        <div class="section-title">🏠 ส่วนประกอบระบบ</div>
+        ${this._toggleHtml('การเชื่อมต่อกริด', 'ปิดสำหรับระบบออฟกริด / เกาะแยก', 'grid_connection', f.grid_connection)}
+        ${this._toggleHtml('วิดเจ็ตสภาพอากาศ', 'แสดงสภาพอากาศบนหน้าภาพรวม', 'weather_widget', f.weather_widget)}
+        ${this._toggleHtml('ซ่อนเส้นสายไฟ', 'แสดงเฉพาะจุดไหลเคลื่อนไหว ซ่อนเส้นสายไฟนิ่งบนการ์ดบ้าน', 'hide_cables', f.hide_cables)}
       </div>
       <div class="section">
-        <div class="section-title">🤖 Energy Management (EMS)</div>
-        <div style="font-size:10px;color:#666;margin-bottom:8px;">Choose your energy optimizer. <a href="https://emhass.readthedocs.io/" target="_blank" style="color:#00d4b8;">EMHASS</a> (add-on), <a href="https://github.com/hass-energy/haeo" target="_blank" style="color:#7c4dff;">HAEO</a> (HACS integration), or <a href="https://github.com/Roving-Ronin/myHomeAssistant" target="_blank" style="color:#ff9800;">Energy Manager</a> (Node-RED).  Configure entities on the Entities tab → EMS section.</div>
+        <div class="section-title">🤖 ระบบจัดการพลังงาน (EMS)</div>
+        <div style="font-size:10px;color:#666;margin-bottom:8px;">Choose your energy optimizer. <a href="https://emhass.readthedocs.io/" target="_blank" style="color:#f5a623;">EMHASS</a> (add-on), <a href="https://github.com/hass-energy/haeo" target="_blank" style="color:#7c4dff;">HAEO</a> (HACS integration), or <a href="https://github.com/Roving-Ronin/myHomeAssistant" target="_blank" style="color:#ff9800;">Energy Manager</a> (Node-RED).  Configure entities on the Entities tab → EMS section.</div>
         <div style="display:flex;gap:8px;margin-bottom:12px;">
           <button class="ems-feature-btn ${emsProvider === 'none' ? 'active' : ''}" data-ems="none" style="flex:1;padding:10px 8px;border:1px solid ${emsProvider === 'none' ? '#8892a4' : '#2d3451'};background:${emsProvider === 'none' ? 'rgba(136,146,164,0.15)' : 'transparent'};color:${emsProvider === 'none' ? '#fff' : '#8892a4'};border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">None</button>
-          <button class="ems-feature-btn ${emsProvider === 'emhass' ? 'active' : ''}" data-ems="emhass" style="flex:1;padding:10px 8px;border:1px solid ${emsProvider === 'emhass' ? '#00d4b8' : '#2d3451'};background:${emsProvider === 'emhass' ? 'rgba(0,212,184,0.15)' : 'transparent'};color:${emsProvider === 'emhass' ? '#00d4b8' : '#8892a4'};border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">EMHASS</button>
+          <button class="ems-feature-btn ${emsProvider === 'emhass' ? 'active' : ''}" data-ems="emhass" style="flex:1;padding:10px 8px;border:1px solid ${emsProvider === 'emhass' ? '#f5a623' : '#2d3451'};background:${emsProvider === 'emhass' ? 'rgba(0,212,184,0.15)' : 'transparent'};color:${emsProvider === 'emhass' ? '#f5a623' : '#8892a4'};border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">EMHASS</button>
           <button class="ems-feature-btn ${emsProvider === 'haeo' ? 'active' : ''}" data-ems="haeo" style="flex:1;padding:10px 8px;border:1px solid ${emsProvider === 'haeo' ? '#7c4dff' : '#2d3451'};background:${emsProvider === 'haeo' ? 'rgba(124,77,255,0.15)' : 'transparent'};color:${emsProvider === 'haeo' ? '#7c4dff' : '#8892a4'};border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">HAEO</button>
           <button class="ems-feature-btn ${emsProvider === 'energy_manager' ? 'active' : ''}" data-ems="energy_manager" style="flex:1;padding:10px 8px;border:1px solid ${emsProvider === 'energy_manager' ? '#ff9800' : '#2d3451'};background:${emsProvider === 'energy_manager' ? 'rgba(255,152,0,0.15)' : 'transparent'};color:${emsProvider === 'energy_manager' ? '#ff9800' : '#8892a4'};border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Energy Mgr</button>
         </div>
         ${emsProvider === 'emhass' ? `
-          ${this._toggleHtml('EMHASS Forecasts', 'Overlay MPC forecast series (PV/Battery/Grid/Load) on energy charts', 'emhass_forecasts', f.emhass_forecasts)}
-          ${this._toggleHtml('Deferrable Loads', 'Show heat pump/boiler schedule forecasts from EMHASS', 'deferrable_loads', f.deferrable_loads)}
-          ${this._toggleHtml('Forecast Table', 'Show a tabular timeline of upcoming forecast data (PV/Battery/Grid/Load/SoC/Prices)', 'forecast_table', f.forecast_table)}
-          ${this._toggleHtml('Financial Tracking', 'Show cost/savings cards and chart annotations', 'financial_tracking', f.financial_tracking)}
+          ${this._toggleHtml('พยากรณ์ EMHASS', 'ซ้อนเส้นพยากรณ์ MPC (โซลาร์/แบต/กริด/โหลด) บนกราฟพลังงาน', 'emhass_forecasts', f.emhass_forecasts)}
+          ${this._toggleHtml('โหลดที่เลื่อนได้', 'แสดงพยากรณ์ตารางปั๊มความร้อน/หม้อต้มจาก EMHASS', 'deferrable_loads', f.deferrable_loads)}
+          ${this._toggleHtml('ตารางพยากรณ์', 'แสดงตารางไทม์ไลน์ข้อมูลพยากรณ์ (โซลาร์/แบต/กริด/โหลด/SoC/ราคา)', 'forecast_table', f.forecast_table)}
+          ${this._toggleHtml('ติดตามค่าใช้จ่าย', 'แสดงการ์ดค่าใช้จ่าย/เงินประหยัด และคำอธิบายบนกราฟ', 'financial_tracking', f.financial_tracking)}
         ` : ''}
         ${emsProvider === 'haeo' ? `
-          ${this._toggleHtml('HAEO Forecasts', 'Overlay HAEO optimization schedule on energy charts (via forecast attributes)', 'haeo_forecasts', f.haeo_forecasts)}
-          ${this._toggleHtml('Forecast Table', 'Show a tabular timeline of upcoming forecast data (PV/Battery/Grid/Load/SoC/Prices)', 'forecast_table', f.forecast_table)}
-          ${this._toggleHtml('Financial Tracking', 'Show optimization cost in chart annotations', 'financial_tracking', f.financial_tracking)}
+          ${this._toggleHtml('พยากรณ์ HAEO', 'ซ้อนตาราง optimize ของ HAEO บนกราฟพลังงาน (ผ่าน forecast attributes)', 'haeo_forecasts', f.haeo_forecasts)}
+          ${this._toggleHtml('ตารางพยากรณ์', 'แสดงตารางไทม์ไลน์ข้อมูลพยากรณ์ (โซลาร์/แบต/กริด/โหลด/SoC/ราคา)', 'forecast_table', f.forecast_table)}
+          ${this._toggleHtml('ติดตามค่าใช้จ่าย', 'แสดงต้นทุนการ optimize ในคำอธิบายกราฟ', 'financial_tracking', f.financial_tracking)}
         ` : ''}
         ${emsProvider === 'energy_manager' ? `
-          ${this._toggleHtml('Forecast Table', 'Show the Energy Manager decision timeline with cost/profit tracking', 'forecast_table', f.forecast_table)}
-          ${this._toggleHtml('Financial Tracking', 'Show cost/profit tracking in chart annotations', 'financial_tracking', f.financial_tracking)}
+          ${this._toggleHtml('ตารางพยากรณ์', 'แสดงไทม์ไลน์การตัดสินใจของ Energy Manager พร้อมติดตามต้นทุน/กำไร', 'forecast_table', f.forecast_table)}
+          ${this._toggleHtml('ติดตามค่าใช้จ่าย', 'แสดงการติดตามต้นทุน/กำไรในคำอธิบายกราฟ', 'financial_tracking', f.financial_tracking)}
         ` : ''}
       </div>
       <div class="section">
-        <div class="section-title">☀️ Solar Forecast</div>
+        <div class="section-title">☀️ พยากรณ์โซลาร์</div>
         <div style="font-size:10px;color:#666;margin-bottom:6px;">Requires <a href="https://github.com/oziee/ha-solcast-solar" target="_blank" style="color:#FFA500;">Solcast</a> or <a href="https://www.home-assistant.io/integrations/forecast_solar/" target="_blank" style="color:#FFA500;">Forecast.Solar</a>. Configure entities on the Entities tab → Solar Forecasting section.</div>
-        ${this._toggleHtml('Solar Forecast', 'Overlay solar production forecast on the energy chart', 'solar_forecast', f.solar_forecast)}
-        ${this._toggleHtml('Sunrise/Sunset Lines', 'Show day/night shading bands on charts', 'sunrise_sunset', f.sunrise_sunset)}
+        ${this._toggleHtml('พยากรณ์โซลาร์', 'Overlay solar production forecast on the energy chart', 'solar_forecast', f.solar_forecast)}
+        ${this._toggleHtml('เส้นพระอาทิตย์ขึ้น/ตก', 'Show day/night shading bands on charts', 'sunrise_sunset', f.sunrise_sunset)}
       </div>
       <div class="section">
-        <div class="section-title">🔌 Optional Equipment</div>
+        <div class="section-title">🔌 อุปกรณ์เสริม</div>
         <div style="font-size:10px;color:#666;margin-bottom:6px;">Enable to show equipment on the house card. Configure power/energy entities on the Entities tab.</div>
         <div style="margin-bottom:8px;padding:8px;background:rgba(232,112,90,0.08);border:1px solid rgba(232,112,90,0.2);border-radius:8px;">
           <div style="font-size:11px;font-weight:600;color:#E8705A;margin-bottom:4px;">EV display modes</div>
           <div style="font-size:10px;color:#8892a4;line-height:1.45;">Use <b>Auto EV</b> when you have a charger state/power entity. It dynamically shows/hides the car, EV charger image, EV cable line, charging dots, and EV labels. Use the manual toggles only when you want the EV visuals to stay visible without auto detection.</div>
         </div>
-        ${this._toggleHtml('Auto EV Gate / Vehicle + Charger', 'Recommended: dynamically show the car, charger, cable line and labels only when the EV is plugged in, connected, or charging', 'ev_vehicle_auto', f.ev_vehicle_auto)}
-        ${this._toggleHtml('Always Show EV Vehicle', 'Manual fallback: always show the car in the garage. Turning this on disables Auto EV.', 'ev_vehicle', f.ev_vehicle)}
-        ${this._toggleHtml('Always Show EV Charger / Cable', 'Manual fallback: always show the charger image and EV cable line when Auto EV is off', 'ev_charger', f.ev_charger)}
+        ${this._toggleHtml('เปิดประตู/แสดงรถ+ที่ชาร์จอัตโนมัติ', 'Recommended: dynamically show the car, charger, cable line and labels only when the EV is plugged in, connected, or charging', 'ev_vehicle_auto', f.ev_vehicle_auto)}
+        ${this._toggleHtml('แสดงรถ EV เสมอ', 'Manual fallback: always show the car in the garage. Turning this on disables Auto EV.', 'ev_vehicle', f.ev_vehicle)}
+        ${this._toggleHtml('แสดงที่ชาร์จ/สายไฟ EV เสมอ', 'Manual fallback: always show the charger image and EV cable line when Auto EV is off', 'ev_charger', f.ev_charger)}
         <div class="row">
           <span class="row-label">Charging Threshold (W)</span>
           <input class="row-input" type="number" min="0" max="20000" step="10" value="${f.ev_vehicle_power_threshold ?? 100}" data-key="ev_vehicle_power_threshold" style="width:90px;" />
         </div>
         <div style="font-size:10px;color:#666;padding:0 0 6px 4px;">Auto EV uses the Charger State entity first (binary on, connected, plugged, preparing, charging, paused, complete, etc.) and falls back to charger power above this threshold. If you enable <b>Always Show EV Vehicle</b>, Auto EV is turned off to avoid conflicting modes.</div>
-        ${this._toggleHtml('Heat Pump / HVAC', 'Show heat pump unit with power flow animation', 'heat_pump', f.heat_pump)}
+        ${this._toggleHtml('ปั๊มความร้อน / HVAC', 'Show heat pump unit with power flow animation', 'heat_pump', f.heat_pump)}
       </div>
       <div class="section">
-        <div class="section-title">🔋 Battery</div>
+        <div class="section-title">🔋 แบตเตอรี่</div>
         <div style="font-size:10px;color:#666;margin-bottom:6px;">Configure battery behavior and runtime estimation. Set the Battery Capacity entity on the Entities tab, or enter a manual value below.</div>
         <div class="row">
           <span class="row-label">Battery Packs</span>
           <input class="row-input" type="number" min="1" max="8" value="${f.battery_packs || 2}" data-key="battery_packs" />
         </div>
         <div style="font-size:10px;color:#666;padding:0 0 6px 4px;">Number of physical battery modules. Individual pack SoC entities are on the Entities tab.</div>
-        ${this._toggleHtml('Positive = Charging', 'Enable if your inverter reports positive battery power when charging. Disable for inverters where positive means discharging (e.g. Deye, Goodwe).', 'battery_positive_charging', f.battery_positive_charging !== false)}
-        ${this._toggleHtml('Battery Runtime', 'Show estimated time to full/empty on the house card battery label', 'battery_runtime', f.battery_runtime !== false)}
+        ${this._toggleHtml('ค่าบวก = กำลังชาร์จ', 'Enable if your inverter reports positive battery power when charging. Disable for inverters where positive means discharging (e.g. Deye, Goodwe).', 'battery_positive_charging', f.battery_positive_charging !== false)}
+        ${this._toggleHtml('เวลาใช้งานแบตเตอรี่', 'Show estimated time to full/empty on the house card battery label', 'battery_runtime', f.battery_runtime !== false)}
         <div style="margin-top:6px;padding:10px;background:rgba(33,150,243,0.08);border:1px solid rgba(33,150,243,0.2);border-radius:8px;">
           <div style="font-size:11px;font-weight:600;color:#64B5F6;margin-bottom:6px;">Runtime Settings</div>
           <div class="row">
@@ -4952,12 +4987,12 @@ class SigenergySettingsCard extends HTMLElement {
         </div>
       </div>
       <div class="section">
-        <div class="section-title">⚡ Smart Load Monitoring</div>
+        <div class="section-title">⚡ ตรวจวัดโหลดอัจฉริยะ</div>
         <div style="font-size:10px;color:#666;margin-bottom:6px;">Track individual appliance power consumption. Enable the feature, then add loads below or use Auto-Detect to find power sensors.</div>
-        ${this._toggleHtml('Smart Loads', 'Show a grid of individual appliance tiles with real-time power and daily energy', 'smart_loads', f.smart_loads)}
+        ${this._toggleHtml('โหลดอัจฉริยะ', 'Show a grid of individual appliance tiles with real-time power and daily energy', 'smart_loads', f.smart_loads)}
         ${f.smart_loads ? `
-          ${this._toggleHtml('Include EMS Loads', 'Also detect entities already assigned as Heat Pump, Boiler, or Deferrable Loads in the EMS/Entities config', 'smart_load_include_ems', f.smart_load_include_ems)}
-          ${this._toggleHtml('Hide Inactive Loads', 'Only show devices that are currently consuming energy (above standby threshold)', 'smart_load_hide_inactive', f.smart_load_hide_inactive)}
+          ${this._toggleHtml('รวมโหลดของ EMS', 'Also detect entities already assigned as Heat Pump, Boiler, or Deferrable Loads in the EMS/Entities config', 'smart_load_include_ems', f.smart_load_include_ems)}
+          ${this._toggleHtml('ซ่อนโหลดที่ไม่ทำงาน', 'Only show devices that are currently consuming energy (above standby threshold)', 'smart_load_hide_inactive', f.smart_load_hide_inactive)}
           <div style="margin-top:8px;">
             <div class="row">
               <span class="row-label" style="font-size:12px;color:#8892a4;">Grid Columns</span>
@@ -4977,7 +5012,7 @@ class SigenergySettingsCard extends HTMLElement {
             </div>
           </div>
           <div style="margin-top:10px;display:flex;gap:6px;">
-            <button class="action-btn" id="sl-auto-detect" style="flex:1;padding:8px;background:rgba(0,212,184,0.12);border:1px solid rgba(0,212,184,0.3);border-radius:8px;color:#00d4b8;font-size:11px;font-weight:600;cursor:pointer;">🔍 Auto-Detect Loads</button>
+            <button class="action-btn" id="sl-auto-detect" style="flex:1;padding:8px;background:rgba(0,212,184,0.12);border:1px solid rgba(0,212,184,0.3);border-radius:8px;color:#f5a623;font-size:11px;font-weight:600;cursor:pointer;">🔍 Auto-Detect Loads</button>
             <button class="action-btn" id="sl-add-manual" style="flex:1;padding:8px;background:rgba(63,81,181,0.12);border:1px solid rgba(63,81,181,0.3);border-radius:8px;color:#7c8cf8;font-size:11px;font-weight:600;cursor:pointer;">➕ Add Manual</button>
           </div>
           <div id="sl-load-list" style="margin-top:10px;">
@@ -4987,18 +5022,18 @@ class SigenergySettingsCard extends HTMLElement {
         ` : ''}
       </div>
       <div class="section">
-        <div class="section-title">🖱️ Interactive Modals</div>
+        <div class="section-title">🖱️ หน้าต่างโต้ตอบ</div>
         <div style="font-size:10px;color:#666;margin-bottom:6px;">Make dashboard elements clickable to open rich detail modals with charts and controls.</div>
-        ${this._toggleHtml('Interactive House Card', 'Click on solar, battery, grid, home, EV, or heat pump labels to open detail modals', 'interactive_house', f.interactive_house)}
-        ${this._toggleHtml('Smart Load Modals', 'Click appliance tiles to open rich detail modals instead of HA more-info dialog', 'smart_load_modals', f.smart_load_modals)}
-        ${this._toggleHtml('Expandable Forecast', 'Click the forecast chart to open a fullscreen modal with tabbed views', 'expandable_forecast', f.expandable_forecast)}
+        ${this._toggleHtml('การ์ดบ้านแบบโต้ตอบ', 'Click on solar, battery, grid, home, EV, or heat pump labels to open detail modals', 'interactive_house', f.interactive_house)}
+        ${this._toggleHtml('หน้าต่างโหลดอัจฉริยะ', 'Click appliance tiles to open rich detail modals instead of HA more-info dialog', 'smart_load_modals', f.smart_load_modals)}
+        ${this._toggleHtml('ขยายพยากรณ์ได้', 'Click the forecast chart to open a fullscreen modal with tabbed views', 'expandable_forecast', f.expandable_forecast)}
       </div>
       <div class="section">
-        <div class="section-title">🛠️ Developer</div>
-        ${this._toggleHtml('Cable Path Editor', 'Drag-to-position cable routing overlay on house card (for layout customization)', 'path_editor', this._pathEditorOn)}
-        ${this._toggleHtml('Clickable Zone Editor', 'Drag and resize the transparent regions used by house-card modal clicks', 'zone_editor', this._zoneEditorOn)}
-        ${this._toggleHtml('Label Position Editor', 'Drag the house-card labels and live values (Solar, Home, Battery, Grid, EV, Heat Pump)', 'label_editor', this._labelEditorOn)}
-        ${this._toggleHtml('Asset Position Editor', 'Drag and adjust perspective/size of the heat pump image on the house card', 'asset_editor', this._assetEditorOn)}
+        <div class="section-title">🛠️ สำหรับนักพัฒนา</div>
+        ${this._toggleHtml('ตัวแก้เส้นทางสายไฟ', 'Drag-to-position cable routing overlay on house card (for layout customization)', 'path_editor', this._pathEditorOn)}
+        ${this._toggleHtml('ตัวแก้โซนคลิก', 'Drag and resize the transparent regions used by house-card modal clicks', 'zone_editor', this._zoneEditorOn)}
+        ${this._toggleHtml('ตัวแก้ตำแหน่งป้าย', 'Drag the house-card labels and live values (Solar, Home, Battery, Grid, EV, Heat Pump)', 'label_editor', this._labelEditorOn)}
+        ${this._toggleHtml('ตัวแก้ตำแหน่งอุปกรณ์', 'Drag and adjust perspective/size of the heat pump image on the house card', 'asset_editor', this._assetEditorOn)}
       </div>
     `;
 
@@ -5168,13 +5203,13 @@ class SigenergySettingsCard extends HTMLElement {
     const slAutoBtn = el.querySelector('#sl-auto-detect');
     if (slAutoBtn) {
       slAutoBtn.addEventListener('click', async () => {
-        slAutoBtn.textContent = '⏳ Detecting...';
+        slAutoBtn.textContent = '⏳ กำลังค้นหา...';
         slAutoBtn.disabled = true;
         try {
           const detected = await this._autoDetectSmartLoads();
           if (detected.length === 0) {
-            slAutoBtn.textContent = '✅ No new loads found';
-            setTimeout(() => { slAutoBtn.textContent = '🔍 Auto-Detect Loads'; slAutoBtn.disabled = false; }, 2000);
+            slAutoBtn.textContent = '✅ ไม่พบโหลดใหม่';
+            setTimeout(() => { slAutoBtn.textContent = '🔍 ค้นหาโหลดอัตโนมัติ'; slAutoBtn.disabled = false; }, 2000);
             return;
           }
           const cfg2 = this._storeGet();
@@ -5190,7 +5225,7 @@ class SigenergySettingsCard extends HTMLElement {
           }
           this._storeSave(cfg2);
           slAutoBtn.textContent = `✅ Added ${added} load${added !== 1 ? 's' : ''}`;
-          setTimeout(() => { slAutoBtn.textContent = '🔍 Auto-Detect Loads'; slAutoBtn.disabled = false; }, 2000);
+          setTimeout(() => { slAutoBtn.textContent = '🔍 ค้นหาโหลดอัตโนมัติ'; slAutoBtn.disabled = false; }, 2000);
           // Rebuild the load list
           const listEl = el.querySelector('#sl-load-list');
           if (listEl) { listEl.innerHTML = this._renderSmartLoadList(cfg2); this._bindSmartLoadListEvents(el); this._bindSmartLoadEntityAutocomplete(el); }
@@ -5198,8 +5233,8 @@ class SigenergySettingsCard extends HTMLElement {
           if (this._hass) this._buildDashboard();
         } catch (e) {
           console.error('Smart load auto-detect failed:', e);
-          slAutoBtn.textContent = '❌ Error';
-          setTimeout(() => { slAutoBtn.textContent = '🔍 Auto-Detect Loads'; slAutoBtn.disabled = false; }, 2000);
+          slAutoBtn.textContent = '❌ ผิดพลาด';
+          setTimeout(() => { slAutoBtn.textContent = '🔍 ค้นหาโหลดอัตโนมัติ'; slAutoBtn.disabled = false; }, 2000);
         }
       });
     }
@@ -5294,14 +5329,14 @@ class SigenergySettingsCard extends HTMLElement {
         panel.id = 'sl-assign-panel';
         panel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a2035;border:1px solid rgba(0,212,184,0.4);border-radius:12px;padding:16px;z-index:9999;min-width:260px;max-height:70vh;overflow:auto;box-shadow:0 8px 32px rgba(0,0,0,0.6);';
         panel.innerHTML = `
-          <div style="font-size:13px;font-weight:700;color:#00d4b8;margin-bottom:10px;">Assign to "${section.name || 'Section'}"</div>
+          <div style="font-size:13px;font-weight:700;color:#f5a623;margin-bottom:10px;">Assign to "${section.name || 'Section'}"</div>
           ${loads.map(l => `
             <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:12px;color:#e0e4ec;">
-              <input type="checkbox" value="${l.entity_power}" ${(section.device_ids||[]).includes(l.entity_power) ? 'checked' : ''} style="accent-color:#00d4b8;" />
+              <input type="checkbox" value="${l.entity_power}" ${(section.device_ids||[]).includes(l.entity_power) ? 'checked' : ''} style="accent-color:#f5a623;" />
               ${l.label || l.entity_power}
             </label>`).join('')}
           <div style="margin-top:12px;display:flex;gap:8px;">
-            <button id="sl-assign-save" style="flex:1;padding:6px;background:#00d4b8;color:#071512;border:none;border-radius:6px;font-weight:700;cursor:pointer;">Save</button>
+            <button id="sl-assign-save" style="flex:1;padding:6px;background:#f5a623;color:#071512;border:none;border-radius:6px;font-weight:700;cursor:pointer;">Save</button>
             <button id="sl-assign-cancel" style="flex:1;padding:6px;background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:6px;cursor:pointer;">Cancel</button>
           </div>`;
         document.body.appendChild(panel);
@@ -5331,17 +5366,17 @@ class SigenergySettingsCard extends HTMLElement {
           <span style="font-size:14px;">☰</span>
           <input class="sl-section-name" data-section-idx="${i}" value="${(s.name||'').replace(/"/g,'&quot;')}" placeholder="Section name" style="flex:1;border:none;background:transparent;color:var(--primary-text-color,#e0e4ec);font-size:12px;font-weight:600;outline:none;" />
           <span style="font-size:10px;color:#8892a4;">${assignedCount}/${loads.length} loads</span>
-          <button class="sl-section-assign" data-section-idx="${i}" style="padding:3px 8px;background:rgba(0,212,184,0.12);border:1px solid rgba(0,212,184,0.3);border-radius:6px;color:#00d4b8;font-size:10px;cursor:pointer;">Assign</button>
+          <button class="sl-section-assign" data-section-idx="${i}" style="padding:3px 8px;background:rgba(0,212,184,0.12);border:1px solid rgba(0,212,184,0.3);border-radius:6px;color:#f5a623;font-size:10px;cursor:pointer;">Assign</button>
           <button class="sl-section-delete" data-section-idx="${i}" style="padding:3px 6px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.25);border-radius:6px;color:#e74c3c;font-size:10px;cursor:pointer;">✕</button>
         </div>`;
     }).join('');
 
     return `
       <div style="margin-top:14px;border-top:1px solid rgba(0,212,184,0.1);padding-top:10px;">
-        <div style="font-size:12px;font-weight:700;color:#00d4b8;margin-bottom:6px;">📂 Load Sections</div>
+        <div style="font-size:12px;font-weight:700;color:#f5a623;margin-bottom:6px;">📂 Load Sections</div>
         <div style="font-size:10px;color:#666;margin-bottom:8px;">Group devices into rooms or categories (e.g. Living Room, Kitchen). Sections appear as collapsible groups in the dashboard.</div>
         <div id="sl-sections-list">${sectionRows}</div>
-        <button id="sl-add-section" style="width:100%;margin-top:4px;padding:7px;background:rgba(0,212,184,0.08);border:1px dashed rgba(0,212,184,0.3);border-radius:8px;color:#00d4b8;font-size:11px;font-weight:600;cursor:pointer;">+ Add Section</button>
+        <button id="sl-add-section" style="width:100%;margin-top:4px;padding:7px;background:rgba(0,212,184,0.08);border:1px dashed rgba(0,212,184,0.3);border-radius:8px;color:#f5a623;font-size:11px;font-weight:600;cursor:pointer;">+ Add Section</button>
       </div>`;
   }
 
@@ -5759,7 +5794,7 @@ class SigenergySettingsCard extends HTMLElement {
     const p = cfg.pricing || {};
     el.innerHTML = `
       <div class="section">
-        <div class="section-title">Price Source</div>
+        <div class="section-title">แหล่งราคาค่าไฟ</div>
         <div class="price-grid">
           <div class="price-btn ${p.source==='tibber'?'active':''}" data-src="tibber">Tibber</div>
           <div class="price-btn ${p.source==='amber'?'active':''}" data-src="amber">Amber Electric</div>
@@ -5768,25 +5803,25 @@ class SigenergySettingsCard extends HTMLElement {
         </div>
       </div>
       <div class="section">
-        <div class="section-title">Thresholds</div>
+        <div class="section-title">เกณฑ์ราคา</div>
         <div class="row">
-          <span class="row-label">Cheap (${this._esc(p.currency||'€')}/kWh)</span>
+          <span class="row-label">Cheap (${this._esc(p.currency||'฿')}/kWh)</span>
           <input class="row-input" type="number" step="0.01" value="${p.cheap_threshold||0.10}" data-key="cheap_threshold" />
         </div>
         <div class="row">
-          <span class="row-label">Expensive (${this._esc(p.currency||'€')}/kWh)</span>
+          <span class="row-label">Expensive (${this._esc(p.currency||'฿')}/kWh)</span>
           <input class="row-input" type="number" step="0.01" value="${p.expensive_threshold||0.25}" data-key="expensive_threshold" />
         </div>
         <div class="row">
           <span class="row-label">Currency Symbol</span>
-          <input class="row-input" type="text" maxlength="3" value="${this._esc(p.currency||'€')}" data-key="currency" />
+          <input class="row-input" type="text" maxlength="3" value="${this._esc(p.currency||'฿')}" data-key="currency" />
         </div>
       </div>
       <div class="section">
-        <div class="section-title">Overlays</div>
-        ${this._toggleHtml('Price on Charts', 'Secondary Y-axis showing price', 'show_price_overlay', p.show_price_overlay)}
-        ${this._toggleHtml('Price Badge', 'Current price on house card', 'show_price_badge', p.show_price_badge)}
-        ${this._toggleHtml('Color Coding', 'Green/yellow/red bands', 'show_color_coding', p.show_color_coding)}
+        <div class="section-title">เส้นซ้อนทับ</div>
+        ${this._toggleHtml('แสดงราคาบนกราฟ', 'Secondary Y-axis showing price', 'show_price_overlay', p.show_price_overlay)}
+        ${this._toggleHtml('ป้ายราคา', 'Current price on house card', 'show_price_badge', p.show_price_badge)}
+        ${this._toggleHtml('ใช้สีแยกระดับ', 'Green/yellow/red bands', 'show_color_coding', p.show_color_coding)}
       </div>
     `;
 
@@ -5858,7 +5893,7 @@ class SigenergySettingsCard extends HTMLElement {
     // Actual solar
     if (entityOk(e.solar_power)) series.push({
       entity: e.solar_power,
-      name: 'Solar', color: '#F0A830', type: 'area', opacity: 0.25,
+      name: 'โซลาร์', color: '#F0A830', type: 'area', opacity: 0.25,
       stroke_width: 2.5, extend_to: false, unit: ' kW',
       transform: powerTransform,
       group_by: { func: 'last', duration: '1min' },
@@ -5868,7 +5903,7 @@ class SigenergySettingsCard extends HTMLElement {
     // Actual battery
     if (entityOk(e.battery_power)) series.push({
       entity: e.battery_power,
-      name: 'Battery', color: '#00d4b8', type: 'line',
+      name: 'แบตเตอรี่', color: '#f5a623', type: 'line',
       stroke_width: 2.5, extend_to: false, unit: ' kW',
       transform: powerTransform,
       group_by: { func: 'last', duration: '1min' },
@@ -5879,7 +5914,7 @@ class SigenergySettingsCard extends HTMLElement {
     const gridPowerEntity = entityOk(e.grid_active_power) ? e.grid_active_power : (entityOk(e.grid_power) ? e.grid_power : '');
     if (gridPowerEntity) series.push({
       entity: gridPowerEntity,
-      name: 'Grid', color: '#E53935', type: 'line',
+      name: 'การไฟฟ้า', color: '#E53935', type: 'line',
       stroke_width: 2.5, extend_to: false, unit: ' kW',
       transform: powerTransform,
       group_by: { func: 'last', duration: '1min' },
@@ -5889,7 +5924,7 @@ class SigenergySettingsCard extends HTMLElement {
     // Actual consumption (inverted)
     if (entityOk(e.load_power)) series.push({
       entity: e.load_power,
-      name: 'Consumption', color: '#AB47BC', type: 'area', opacity: 0.10,
+      name: 'การใช้ไฟ', color: '#AB47BC', type: 'area', opacity: 0.10,
       stroke_width: 1.5, extend_to: false, unit: ' kW',
       transform: powerTransform,
       group_by: { func: 'last', duration: '1min' },
@@ -5901,7 +5936,7 @@ class SigenergySettingsCard extends HTMLElement {
     if (features.emhass && features.emhass_forecasts && entityOk(e.mpc_pv)) {
       // PV forecast
       series.push({
-        entity: e.mpc_pv, name: 'Solar (plan)', color: '#FFF59D',
+        entity: e.mpc_pv, name: 'โซลาร์ (พยากรณ์)', color: '#FFF59D',
         type: 'area', opacity: 0.06, curve: 'smooth', extend_to: false,
         unit: ' kW', float_precision: fp, stroke_width: 1, stroke_dash: 5,
         show: { in_header: false, legend_value: false, in_legend: false },
@@ -5911,7 +5946,7 @@ class SigenergySettingsCard extends HTMLElement {
       // Battery forecast
       if (entityOk(e.mpc_battery)) {
         series.push({
-          entity: e.mpc_battery, name: 'Battery (plan)', color: '#A5D6A7',
+          entity: e.mpc_battery, name: 'แบตเตอรี่ (พยากรณ์)', color: '#A5D6A7',
           type: 'area', opacity: 0.06, curve: 'stepline', extend_to: false,
           unit: ' kW', stroke_width: 1, stroke_dash: 5,
           show: { in_header: false, legend_value: false, in_legend: false },
@@ -5922,7 +5957,7 @@ class SigenergySettingsCard extends HTMLElement {
       // Grid forecast
       if (entityOk(e.mpc_grid)) {
         series.push({
-          entity: e.mpc_grid, name: 'Grid (plan)', color: '#EF5350',
+          entity: e.mpc_grid, name: 'กริด (พยากรณ์)', color: '#EF5350',
           type: 'line', curve: 'stepline', stroke_width: 1, stroke_dash: 5,
           extend_to: false, unit: ' kW',
           show: { in_header: false, legend_value: false, in_legend: false },
@@ -5933,7 +5968,7 @@ class SigenergySettingsCard extends HTMLElement {
       // Load forecast (inverted)
       if (entityOk(e.mpc_load)) {
         series.push({
-          entity: e.mpc_load, name: 'Load (plan)', color: '#CE93D8',
+          entity: e.mpc_load, name: 'โหลด (พยากรณ์)', color: '#CE93D8',
           type: 'line', curve: 'smooth', extend_to: false, unit: ' kW',
           float_precision: fp, stroke_width: 1, stroke_dash: 4,
           show: { in_header: false, legend_value: false, in_chart: true, in_legend: false },
@@ -5944,7 +5979,7 @@ class SigenergySettingsCard extends HTMLElement {
       // SOC forecast (secondary axis)
       if (entityOk(e.mpc_soc)) {
         series.push({
-          entity: e.mpc_soc, name: 'SOC (plan)', color: '#81C784',
+          entity: e.mpc_soc, name: 'SOC (พยากรณ์)', color: '#81C784',
           type: 'line', curve: 'stepline', stroke_width: 1, stroke_dash: 5,
           extend_to: false, unit: ' %',
           show: { in_header: false, legend_value: false, in_legend: false },
@@ -5993,7 +6028,7 @@ class SigenergySettingsCard extends HTMLElement {
       // HAEO Solar forecast
       if (e.haeo_solar_power) {
         series.push({
-          entity: e.haeo_solar_power, name: 'Solar (plan)', color: '#FFF59D',
+          entity: e.haeo_solar_power, name: 'โซลาร์ (พยากรณ์)', color: '#FFF59D',
           type: 'area', opacity: 0.06, curve: 'smooth', extend_to: false,
           unit: ' kW', float_precision: fp, stroke_width: 1, stroke_dash: 5,
           show: { in_header: false, legend_value: false, in_legend: false },
@@ -6004,7 +6039,7 @@ class SigenergySettingsCard extends HTMLElement {
       // HAEO Grid forecast
       if (e.haeo_grid_power) {
         series.push({
-          entity: e.haeo_grid_power, name: 'Grid (plan)', color: '#EF5350',
+          entity: e.haeo_grid_power, name: 'กริด (พยากรณ์)', color: '#EF5350',
           type: 'line', curve: 'stepline', stroke_width: 1, stroke_dash: 5,
           extend_to: false, unit: ' kW',
           show: { in_header: false, legend_value: false, in_legend: false },
@@ -6015,7 +6050,7 @@ class SigenergySettingsCard extends HTMLElement {
       // HAEO Load forecast (inverted)
       if (e.haeo_load_power) {
         series.push({
-          entity: e.haeo_load_power, name: 'Load (plan)', color: '#CE93D8',
+          entity: e.haeo_load_power, name: 'โหลด (พยากรณ์)', color: '#CE93D8',
           type: 'line', curve: 'smooth', extend_to: false, unit: ' kW',
           float_precision: fp, stroke_width: 1, stroke_dash: 4,
           show: { in_header: false, legend_value: false, in_chart: true, in_legend: false },
@@ -6026,7 +6061,7 @@ class SigenergySettingsCard extends HTMLElement {
       // HAEO SOC forecast (secondary axis)
       if (e.haeo_battery_soc) {
         series.push({
-          entity: e.haeo_battery_soc, name: 'SOC (plan)', color: '#81C784',
+          entity: e.haeo_battery_soc, name: 'SOC (พยากรณ์)', color: '#81C784',
           type: 'line', curve: 'stepline', stroke_width: 1, stroke_dash: 5,
           extend_to: false, unit: ' %',
           show: { in_header: false, legend_value: false, in_legend: false },
@@ -6057,7 +6092,7 @@ class SigenergySettingsCard extends HTMLElement {
 
     // Price overlays — independent of EMS provider (works with EMHASS, HAEO, or standalone)
     {
-      const priceUnit = ' ' + (cfg.pricing?.currency || '€') + '/kWh';
+      const priceUnit = ' ' + (cfg.pricing?.currency || '฿') + '/kWh';
       if (e.buy_price) {
         // Universal data_generator: tries EMHASS attributes, then Amber/generic forecast, then returns empty for state-tracked fallback
         const buyDG = `var d = entity.attributes.unit_load_cost_forecasts;
@@ -6066,7 +6101,7 @@ var fc = entity.attributes.forecasts || entity.attributes.forecast;
 if (fc && Array.isArray(fc) && fc.length) return fc.map(function(p){ return [new Date(p.start_time || p.time || p.date).getTime(), parseFloat(p.per_kwh || p.price || p.value || 0)]; });
 return [];`;
         series.push({
-          entity: e.buy_price, name: 'Import Price (plan)', color: '#FFD54F',
+          entity: e.buy_price, name: 'ราคารับซื้อ (พยากรณ์)', color: '#FFD54F',
           type: 'line', extend_to: false, unit: priceUnit,
           float_precision: 2, stroke_width: 1, opacity: 0.7,
           show: { in_header: false, legend_value: false, in_legend: false },
@@ -6076,7 +6111,7 @@ return [];`;
         // State-tracked line (actual price history) — only if no separate current_import_price
         if (!e.current_import_price || e.current_import_price === e.buy_price) {
           series.push({
-            entity: e.buy_price, name: 'Import Price', color: '#FFB300',
+            entity: e.buy_price, name: 'ราคารับซื้อ', color: '#FFB300',
             type: 'area', opacity: 0.08, stroke_width: 2, extend_to: false,
             unit: priceUnit, float_precision: 2,
             group_by: { func: 'avg', duration: '30min' },
@@ -6092,7 +6127,7 @@ var fc = entity.attributes.forecasts || entity.attributes.forecast;
 if (fc && Array.isArray(fc) && fc.length) return fc.map(function(p){ return [new Date(p.start_time || p.time || p.date).getTime(), parseFloat(p.per_kwh || p.price || p.value || 0)]; });
 return [];`;
         series.push({
-          entity: e.sell_price, name: 'Export Price (plan)', color: '#A5D6A7',
+          entity: e.sell_price, name: 'ราคาขายออก (พยากรณ์)', color: '#A5D6A7',
           type: 'line', extend_to: false, unit: priceUnit,
           float_precision: 2, stroke_width: 1, opacity: 0.7,
           show: { in_header: false, legend_value: false, in_legend: false },
@@ -6102,7 +6137,7 @@ return [];`;
         // State-tracked line — only if no separate current_export_price
         if (!e.current_export_price || e.current_export_price === e.sell_price) {
           series.push({
-            entity: e.sell_price, name: 'Export Price', color: '#43A047',
+            entity: e.sell_price, name: 'ราคาขายออก', color: '#43A047',
             type: 'area', opacity: 0.08, stroke_width: 2, extend_to: false,
             unit: priceUnit, float_precision: 2,
             group_by: { func: 'avg', duration: '30min' },
@@ -6114,7 +6149,7 @@ return [];`;
       // Actual prices (separate entities — used when buy/sell are EMHASS-specific and these are the actual Amber/Nordpool sensors)
       if (e.current_import_price && e.current_import_price !== e.buy_price) {
         series.push({
-          entity: e.current_import_price, name: 'Import Price', color: '#FFB300',
+          entity: e.current_import_price, name: 'ราคารับซื้อ', color: '#FFB300',
           type: 'area', opacity: 0.08, stroke_width: 2, extend_to: false,
           unit: priceUnit, float_precision: 2,
           group_by: { func: 'avg', duration: '1h' },
@@ -6124,7 +6159,7 @@ return [];`;
       }
       if (e.current_export_price && e.current_export_price !== e.sell_price) {
         series.push({
-          entity: e.current_export_price, name: 'Export Price', color: '#43A047',
+          entity: e.current_export_price, name: 'ราคาขายออก', color: '#43A047',
           type: 'area', opacity: 0.08, stroke_width: 2, extend_to: false,
           unit: priceUnit, float_precision: 2,
           group_by: { func: 'avg', duration: '1h' },
@@ -6141,7 +6176,7 @@ return [];`;
       if (solcastEntity) {
         series.push({
           entity: solcastEntity,
-          name: 'Solar Forecast',
+          name: 'พยากรณ์โซลาร์',
           color: '#FFD54F',
           type: 'area', opacity: 0.12, curve: 'smooth',
           extend_to: false, unit: ' kW', float_precision: 1,
@@ -6220,14 +6255,14 @@ return forecast.map(function(d) {
     if (features.emhass && features.financial_tracking) {
       if (e.emhass_net_cost_today) {
         series.push({
-          entity: e.emhass_net_cost_today, name: 'Cost Today', unit: ' ' + (cfg.pricing?.currency || '€'),
+          entity: e.emhass_net_cost_today, name: 'ค่าไฟวันนี้', unit: ' ' + (cfg.pricing?.currency || '฿'),
           show: { legend_value: true, in_chart: false, in_header: 'raw' },
           float_precision: 2, yaxis_id: 'power'
         });
       }
       if (e.emhass_savings_today) {
         series.push({
-          entity: e.emhass_savings_today, name: 'Savings Today', unit: ' ' + (cfg.pricing?.currency || '€'),
+          entity: e.emhass_savings_today, name: 'ประหยัดวันนี้', unit: ' ' + (cfg.pricing?.currency || '฿'),
           color: '#4CAF50',
           show: { legend_value: true, in_chart: false, in_header: 'raw' },
           float_precision: 2, yaxis_id: 'power'
@@ -6239,12 +6274,12 @@ return forecast.map(function(d) {
   }
 
   _buildYAxes(features, cfg) {
-    const currency = cfg?.pricing?.currency || '€';
+    const currency = cfg?.pricing?.currency || '฿';
     const yaxis = [
       {
         id: 'power', min: 'auto', max: 'auto', decimals: 1,
         apex_config: {
-          title: { text: 'Power (kW)', style: { fontSize: '11px', color: 'rgba(255,255,255,0.6)', fontWeight: 500 } },
+          title: { text: 'กำลังไฟ (kW)', style: { fontSize: '11px', color: 'rgba(255,255,255,0.6)', fontWeight: 500 } },
           labels: { style: { fontSize: '10px', colors: ['rgba(255,255,255,0.5)'] } },
           forceNiceScale: true, tickAmount: 6
         }
@@ -6261,7 +6296,7 @@ return forecast.map(function(d) {
         id: 'price', min: 'auto', max: 'auto', decimals: 2,
         opposite: true,
         apex_config: {
-          title: { text: 'Price (' + currency + '/kWh)', style: { fontSize: '11px', color: '#888' } },
+          title: { text: 'ราคา (' + currency + '/kWh)', style: { fontSize: '11px', color: '#888' } },
           labels: { style: { fontSize: '10px', colors: ['#888'] } },
           forceNiceScale: true, tickAmount: 4
         }
@@ -6281,7 +6316,7 @@ return forecast.map(function(d) {
           id: 'price', min: 'auto', max: 'auto', decimals: 2,
           opposite: true,
           apex_config: {
-            title: { text: 'Price (' + currency + '/kWh)', style: { fontSize: '11px', color: '#888' } },
+            title: { text: 'ราคา (' + currency + '/kWh)', style: { fontSize: '11px', color: '#888' } },
             labels: { style: { fontSize: '10px', colors: ['#888'] } },
             forceNiceScale: true, tickAmount: 4
           }
@@ -6295,7 +6330,7 @@ return forecast.map(function(d) {
         id: 'price', min: 'auto', max: 'auto', decimals: 2,
         opposite: true,
         apex_config: {
-          title: { text: 'Price (' + currency + '/kWh)', style: { fontSize: '11px', color: '#888' } },
+          title: { text: 'ราคา (' + currency + '/kWh)', style: { fontSize: '11px', color: '#888' } },
           labels: { style: { fontSize: '10px', colors: ['#888'] } },
           forceNiceScale: true, tickAmount: 4
         }
@@ -6386,8 +6421,8 @@ return forecast.map(function(d) {
       }
 
       const _apexCardModStyle = _resolvedTheme === 'light'
-        ? 'ha-card { background: var(--ha-card-background, rgba(255,255,255,0.95)) !important; border: 1px solid var(--divider-color, rgba(0,0,0,0.08)) !important; border-radius: var(--ha-card-border-radius, 16px) !important; color: var(--primary-text-color, #1a1f2e); box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important; } .apexcharts-tooltip { background: rgba(255,255,255,0.96) !important; border: 1px solid rgba(0,212,184,0.25) !important; border-radius: 8px !important; color: #333 !important; font-size: 12px !important; backdrop-filter: blur(8px) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; } .apexcharts-tooltip-title { background: rgba(0,212,184,0.08) !important; border-bottom: 1px solid rgba(0,212,184,0.15) !important; color: #1a1f2e !important; font-weight: 600 !important; } .apexcharts-toolbar { top: 4px !important; right: 4px !important; } .apexcharts-toolbar svg { fill: rgba(0,0,0,0.4) !important; } .apexcharts-toolbar svg:hover { fill: #00b89c !important; } .apexcharts-legend-series { display: inline-flex !important; align-items: center !important; gap: 4px !important; } .apexcharts-legend-text:empty { display: none !important; } .apexcharts-legend-text:empty + .apexcharts-legend-marker, .apexcharts-legend-series:has(.apexcharts-legend-text:empty) { display: none !important; } @media (max-width: 600px) { .apexcharts-legend-text { font-size: 13px !important; } .apexcharts-legend-marker { width: 10px !important; height: 10px !important; } }'
-        : 'ha-card { background: var(--ha-card-background, linear-gradient(135deg, rgba(30,33,40,0.95) 0%, rgba(40,44,52,0.98) 100%)) !important; border: 1px solid var(--divider-color, rgba(92,156,230,0.12)) !important; border-radius: var(--ha-card-border-radius, 16px) !important; color: var(--primary-text-color, #fff); } .apexcharts-tooltip { background: rgba(26,31,46,0.95) !important; border: 1px solid rgba(0,212,184,0.3) !important; border-radius: 8px !important; color: #e0e0e0 !important; font-size: 12px !important; backdrop-filter: blur(8px) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; } .apexcharts-tooltip-title { background: rgba(0,212,184,0.12) !important; border-bottom: 1px solid rgba(0,212,184,0.2) !important; color: #fff !important; font-weight: 600 !important; } .apexcharts-toolbar { top: 4px !important; right: 4px !important; } .apexcharts-toolbar .apexcharts-zoom-icon svg, .apexcharts-toolbar .apexcharts-pan-icon svg, .apexcharts-toolbar .apexcharts-reset-icon svg, .apexcharts-toolbar .apexcharts-zoomin-icon svg, .apexcharts-toolbar .apexcharts-zoomout-icon svg, .apexcharts-toolbar .apexcharts-selection-icon svg { fill: rgba(255,255,255,0.5) !important; } .apexcharts-toolbar svg:hover { fill: #00d4b8 !important; } .apexcharts-legend-series { display: inline-flex !important; align-items: center !important; gap: 4px !important; } .apexcharts-legend-text:empty { display: none !important; } .apexcharts-legend-text:empty + .apexcharts-legend-marker, .apexcharts-legend-series:has(.apexcharts-legend-text:empty) { display: none !important; } @media (max-width: 600px) { .apexcharts-legend-text { font-size: 13px !important; } .apexcharts-legend-marker { width: 10px !important; height: 10px !important; } }';
+        ? 'ha-card { background: var(--ha-card-background, rgba(255,255,255,0.95)) !important; border: 1px solid var(--divider-color, rgba(0,0,0,0.08)) !important; border-radius: var(--ha-card-border-radius, 16px) !important; color: var(--primary-text-color, #1a1f2e); box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important; } .apexcharts-tooltip { background: rgba(255,255,255,0.96) !important; border: 1px solid rgba(0,212,184,0.25) !important; border-radius: 8px !important; color: #333 !important; font-size: 12px !important; backdrop-filter: blur(8px) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; } .apexcharts-tooltip-title { background: rgba(0,212,184,0.08) !important; border-bottom: 1px solid rgba(0,212,184,0.15) !important; color: #1a1f2e !important; font-weight: 600 !important; } .apexcharts-toolbar { top: 4px !important; right: 4px !important; } .apexcharts-toolbar svg { fill: rgba(0,0,0,0.4) !important; } .apexcharts-toolbar svg:hover { fill: #d98b0c !important; } .apexcharts-legend-series { display: inline-flex !important; align-items: center !important; gap: 4px !important; } .apexcharts-legend-text:empty { display: none !important; } .apexcharts-legend-text:empty + .apexcharts-legend-marker, .apexcharts-legend-series:has(.apexcharts-legend-text:empty) { display: none !important; } @media (max-width: 600px) { .apexcharts-legend-text { font-size: 13px !important; } .apexcharts-legend-marker { width: 10px !important; height: 10px !important; } }'
+        : 'ha-card { background: var(--ha-card-background, linear-gradient(135deg, rgba(30,33,40,0.95) 0%, rgba(40,44,52,0.98) 100%)) !important; border: 1px solid var(--divider-color, rgba(92,156,230,0.12)) !important; border-radius: var(--ha-card-border-radius, 16px) !important; color: var(--primary-text-color, #fff); } .apexcharts-tooltip { background: rgba(26,31,46,0.95) !important; border: 1px solid rgba(0,212,184,0.3) !important; border-radius: 8px !important; color: #e0e0e0 !important; font-size: 12px !important; backdrop-filter: blur(8px) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; } .apexcharts-tooltip-title { background: rgba(0,212,184,0.12) !important; border-bottom: 1px solid rgba(0,212,184,0.2) !important; color: #fff !important; font-weight: 600 !important; } .apexcharts-toolbar { top: 4px !important; right: 4px !important; } .apexcharts-toolbar .apexcharts-zoom-icon svg, .apexcharts-toolbar .apexcharts-pan-icon svg, .apexcharts-toolbar .apexcharts-reset-icon svg, .apexcharts-toolbar .apexcharts-zoomin-icon svg, .apexcharts-toolbar .apexcharts-zoomout-icon svg, .apexcharts-toolbar .apexcharts-selection-icon svg { fill: rgba(255,255,255,0.5) !important; } .apexcharts-toolbar svg:hover { fill: #f5a623 !important; } .apexcharts-legend-series { display: inline-flex !important; align-items: center !important; gap: 4px !important; } .apexcharts-legend-text:empty { display: none !important; } .apexcharts-legend-text:empty + .apexcharts-legend-marker, .apexcharts-legend-series:has(.apexcharts-legend-text:empty) { display: none !important; } @media (max-width: 600px) { .apexcharts-legend-text { font-size: 13px !important; } .apexcharts-legend-marker { width: 10px !important; height: 10px !important; } }';
 
       const apexChart = {
         type: 'custom:apexcharts-card',
@@ -6396,7 +6431,7 @@ return forecast.map(function(d) {
         },
         header: {
           show: true, show_states: true, colorize_states: true,
-          title: hasEmhassForecasts ? 'Energy + EMHASS Forecast' : hasHaeoForecasts ? 'Energy + HAEO Forecast' : hasSolarForecast ? 'Energy + Solar Forecast' : 'Energy Overview'
+          title: hasEmhassForecasts ? 'พลังงาน + พยากรณ์ EMHASS' : hasHaeoForecasts ? 'พลังงาน + พยากรณ์ HAEO' : hasSolarForecast ? 'พลังงาน + พยากรณ์โซลาร์' : 'ภาพรวมพลังงาน'
         },
         graph_span: showExtendedChart ? '48h' : '24h',
         update_interval: cfg.display?.chart_refresh_interval || '60s',
@@ -6424,7 +6459,7 @@ return forecast.map(function(d) {
             tickAmount: showExtendedChart ? 24 : 12,
             axisBorder: { show: false },
             axisTicks: { show: true, color: _resolvedTheme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)' },
-            crosshairs: { show: true, stroke: { color: '#00d4b8', width: 1, dashArray: 3 } }
+            crosshairs: { show: true, stroke: { color: '#f5a623', width: 1, dashArray: 3 } }
           },
           tooltip: {
             x: { format: 'dd MMM HH:mm' }, shared: true, intersect: false,
@@ -6452,7 +6487,7 @@ return forecast.map(function(d) {
             xaxis: _sunXAnnotations.length > 0 ? _sunXAnnotations : undefined
           }
         },
-        now: { show: true, label: 'Now', color: '#00d4b8' },
+        now: { show: true, label: 'Now', color: '#f5a623' },
         span: showExtendedChart ? { start: 'hour', offset: '-12h' } : undefined,
         all_series_config: { stroke_width: 2 },
         yaxis: yaxis,
@@ -6505,30 +6540,32 @@ return forecast.map(function(d) {
                "{% if w >= " + pwrThresh + " %}{{ (w / 1000) | round(2) }} kW{% else %}{{ w | round(0) }} W{% endif %}";
       };
 
-      // Card styles
+      // Card styles - Apple-Glass gl-regular material.
+      // Frosted translucent fill, dual-edge inner lighting, hairline border,
+      // no plain drop shadow. Numbers render mono tabular.
       const _cardStyle = _resolvedTheme === 'light'
-        ? 'ha-card { background: linear-gradient(135deg, rgba(0,212,184,0.06) 0%, rgba(255,255,255,0.92) 60%, rgba(240,252,250,0.95) 100%) !important; backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important; border: 1px solid rgba(0,212,184,0.18) !important; border-radius: 16px !important; color: var(--primary-text-color, #1a1f2e) !important; box-shadow: 0 2px 12px rgba(0,212,184,0.08), inset 0 1px 0 rgba(255,255,255,0.8) !important; transition: transform 0.15s ease, box-shadow 0.15s ease !important; } ha-card:active { transform: scale(0.97) !important; } mushroom-state-info { --card-primary-font-size: 14px !important; --card-secondary-font-size: 14px !important; }'
-        : 'ha-card { background: linear-gradient(135deg, rgba(18,24,40,0.95) 0%, rgba(26,31,46,0.98) 50%, rgba(20,28,42,0.95) 100%) !important; backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important; border: 1px solid rgba(0,212,184,0.18) !important; border-radius: 16px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(0,212,184,0.06) !important; transition: transform 0.15s ease, box-shadow 0.15s ease !important; } ha-card:active { transform: scale(0.97) !important; } mushroom-state-info { --card-primary-font-size: 14px !important; --card-secondary-font-size: 14px !important; }';
+        ? "ha-card { background: rgba(255,255,255,0.55) !important; backdrop-filter: blur(28px) saturate(1.6) !important; -webkit-backdrop-filter: blur(28px) saturate(1.6) !important; border: 1px solid rgba(20,17,13,0.08) !important; border-radius: 16px !important; color: var(--primary-text-color, #14110d) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.80), inset 0 -1px 0 rgba(20,17,13,0.05) !important; transition: background-color 0.2s ease, box-shadow 0.2s ease !important; } mushroom-state-info { --card-primary-font-size: 14px !important; --card-secondary-font-size: 14px !important; } mushroom-state-info .secondary { font-variant-numeric: tabular-nums !important; font-family: ui-monospace, 'SF Mono', monospace !important; }"
+        : "ha-card { background: rgba(255,255,255,0.06) !important; backdrop-filter: blur(28px) saturate(1.6) !important; -webkit-backdrop-filter: blur(28px) saturate(1.6) !important; border: 1px solid rgba(255,255,255,0.10) !important; border-radius: 16px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.20) !important; transition: background-color 0.2s ease, box-shadow 0.2s ease !important; } mushroom-state-info { --card-primary-font-size: 14px !important; --card-secondary-font-size: 14px !important; } mushroom-state-info .secondary { font-variant-numeric: tabular-nums !important; font-family: ui-monospace, 'SF Mono', monospace !important; }";
       const statusCards = [];
       if (e.solar_power) statusCards.push({
         type: 'custom:mushroom-template-card',
-        entity: e.solar_power, primary: 'Solar', icon: 'mdi:solar-power', icon_color: 'orange',
+        entity: e.solar_power, primary: 'โซลาร์', icon: 'mdi:solar-power', icon_color: 'orange',
         secondary: _powerTpl(e.solar_power), card_mod: { style: _cardStyle }
       });
       if (e.load_power) statusCards.push({
         type: 'custom:mushroom-template-card',
-        entity: e.load_power, primary: 'Home', icon: 'mdi:home-lightning-bolt', icon_color: 'deep-purple',
+        entity: e.load_power, primary: 'บ้าน', icon: 'mdi:home-lightning-bolt', icon_color: 'deep-purple',
         secondary: _powerTpl(e.load_power), card_mod: { style: _cardStyle }
       });
       if (e.battery_soc) statusCards.push({
         type: 'custom:mushroom-template-card',
-        entity: e.battery_soc, primary: 'Battery', icon: 'mdi:battery', icon_color: 'green',
+        entity: e.battery_soc, primary: 'แบตเตอรี่', icon: 'mdi:battery', icon_color: 'green',
         secondary: "{{ states('" + e.battery_soc + "') | round(0) }}%",
         card_mod: { style: _cardStyle }
       });
       if (e.grid_active_power || e.grid_power) statusCards.push({
         type: 'custom:mushroom-template-card',
-        entity: e.grid_active_power || e.grid_power, primary: 'Grid', icon: 'mdi:transmission-tower', icon_color: 'red',
+        entity: e.grid_active_power || e.grid_power, primary: 'การไฟฟ้า', icon: 'mdi:transmission-tower', icon_color: 'red',
         secondary: _powerTpl(e.grid_active_power || e.grid_power), card_mod: { style: _cardStyle }
       });
 
@@ -6551,10 +6588,10 @@ return forecast.map(function(d) {
           card_mod: { style: _cardStyle }
         });
       };
-      addStat(e.solar_energy_today, 'Solar', 'mdi:solar-power', 'orange');
-      addStat(e.load_energy_today, 'Load', 'mdi:power-plug', 'purple');
-      addStat(e.battery_charge_today, 'Charged', 'mdi:battery-arrow-up', 'green');
-      addStat(e.battery_discharge_today, 'Discharged', 'mdi:battery-arrow-down', 'teal');
+      addStat(e.solar_energy_today, 'โซลาร์', 'mdi:solar-power', 'orange');
+      addStat(e.load_energy_today, 'ใช้ไฟ', 'mdi:power-plug', 'purple');
+      addStat(e.battery_charge_today, 'ชาร์จเข้า', 'mdi:battery-arrow-up', 'green');
+      addStat(e.battery_discharge_today, 'จ่ายออก', 'mdi:battery-arrow-down', 'teal');
 
       // Grid import/export mushroom cards — dual tariff sums high+low via Jinja (unit-aware)
       if (f.dual_tariff && (e.grid_import_high_tariff || e.grid_import_low_tariff)) {
@@ -6571,12 +6608,12 @@ return forecast.map(function(d) {
         statCards.push({
           type: 'custom:mushroom-template-card',
           entity: impEntity,
-          primary: 'Imported', icon: 'mdi:transmission-tower-import', icon_color: 'red',
+          primary: 'รับไฟเข้า', icon: 'mdi:transmission-tower-import', icon_color: 'red',
           secondary: impSecondary,
           card_mod: { style: _cardStyle }
         });
       } else {
-        addStat(e.grid_import_today, 'Imported', 'mdi:transmission-tower-import', 'red');
+        addStat(e.grid_import_today, 'รับไฟเข้า', 'mdi:transmission-tower-import', 'red');
       }
       if (f.dual_tariff && (e.grid_export_high_tariff || e.grid_export_low_tariff)) {
         const hiE = e.grid_export_high_tariff, loE = e.grid_export_low_tariff;
@@ -6592,19 +6629,19 @@ return forecast.map(function(d) {
         statCards.push({
           type: 'custom:mushroom-template-card',
           entity: expEntity,
-          primary: 'Exported', icon: 'mdi:transmission-tower-export', icon_color: 'blue',
+          primary: 'ขายไฟออก', icon: 'mdi:transmission-tower-export', icon_color: 'blue',
           secondary: expSecondary,
           card_mod: { style: _cardStyle }
         });
       } else {
-        addStat(e.grid_export_today, 'Exported', 'mdi:transmission-tower-export', 'blue');
+        addStat(e.grid_export_today, 'ขายไฟออก', 'mdi:transmission-tower-export', 'blue');
       }
 
       // Build self-sufficiency card (unit-aware: normalise both to kWh before dividing)
       const selfSuffCard = (e.solar_energy_today && e.load_energy_today) ? {
         type: 'custom:mushroom-template-card',
         entity: e.solar_energy_today,
-        primary: 'Self-Sufficiency',
+        primary: 'พึ่งพาตนเองได้',
         secondary: "{% set su = (state_attr('" + e.solar_energy_today + "', 'unit_of_measurement') or 'kWh') | string %}" +
           "{% set sr = states('" + e.solar_energy_today + "') | float(0) %}" +
           "{% set solar = sr * 1000 if su == 'MWh' else sr / 1000 if su == 'Wh' else sr %}" +
@@ -6614,8 +6651,8 @@ return forecast.map(function(d) {
           "{{ ((solar / load) * 100) | round(1) if load > 0 else 0 }}%",
         icon: 'mdi:check-decagram', icon_color: 'green',
         card_mod: { style: _resolvedTheme === 'light'
-          ? 'ha-card { background: linear-gradient(135deg, rgba(0,212,184,0.08), rgba(255,255,255,0.9)) !important; backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important; border: 1px solid rgba(0,212,184,0.2) !important; border-radius: 16px !important; color: var(--primary-text-color, #1a1f2e) !important; box-shadow: 0 2px 12px rgba(0,212,184,0.1) !important; } mushroom-state-info { --card-primary-font-size: 14px !important; --card-secondary-font-size: 18px !important; --card-secondary-color: #00b89c !important; }'
-          : 'ha-card { background: linear-gradient(135deg, rgba(0,212,184,0.12), rgba(45,52,81,0.5)) !important; backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important; border: 1px solid rgba(0,212,184,0.2) !important; border-radius: 16px !important; box-shadow: 0 4px 16px rgba(0,212,184,0.1), inset 0 1px 0 rgba(0,212,184,0.1) !important; } mushroom-state-info { --card-primary-font-size: 14px !important; --card-secondary-font-size: 18px !important; --card-secondary-color: #00d4b8 !important; }' }
+          ? 'ha-card { background: linear-gradient(135deg, rgba(0,212,184,0.08), rgba(255,255,255,0.9)) !important; backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important; border: 1px solid rgba(0,212,184,0.2) !important; border-radius: 16px !important; color: var(--primary-text-color, #1a1f2e) !important; box-shadow: 0 2px 12px rgba(0,212,184,0.1) !important; } mushroom-state-info { --card-primary-font-size: 14px !important; --card-secondary-font-size: 18px !important; --card-secondary-color: #d98b0c !important; }'
+          : 'ha-card { background: linear-gradient(135deg, rgba(0,212,184,0.12), rgba(45,52,81,0.5)) !important; backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important; border: 1px solid rgba(0,212,184,0.2) !important; border-radius: 16px !important; box-shadow: 0 4px 16px rgba(0,212,184,0.1), inset 0 1px 0 rgba(0,212,184,0.1) !important; } mushroom-state-info { --card-primary-font-size: 14px !important; --card-secondary-font-size: 18px !important; --card-secondary-color: #f5a623 !important; }' }
       } : null;
 
       // Build Solcast forecast card (conditional)
@@ -6872,8 +6909,8 @@ return forecast.map(function(d) {
       // hides them (below min_state), the click target mismatch doesn't affect
       // the main destination items (Home, Battery, Grid).
       const sankeyDest = [];
-      if (e.load_energy_today) sankeyDest.push({ entity_id: e.load_energy_today, name: 'Home', color: '#9B7AB8' });
-      if (e.battery_charge_today) sankeyDest.push({ entity_id: e.battery_charge_today, name: 'Battery', color: '#4ECDC4' });
+      if (e.load_energy_today) sankeyDest.push({ entity_id: e.load_energy_today, name: 'บ้าน', color: '#9B7AB8' });
+      if (e.battery_charge_today) sankeyDest.push({ entity_id: e.battery_charge_today, name: 'แบตเตอรี่', color: '#4ECDC4' });
 
       // Grid export destination — prefer the non-tariff total entity for accurate Sankey sizing.
       // Only fall back to tariff add_entities summation when grid_export_today is missing.
@@ -6888,7 +6925,7 @@ return forecast.map(function(d) {
           : undefined;
       }
       if (_gridExportId) {
-        const exportNode = { entity_id: _gridExportId, name: 'Grid', color: '#7B8FD4' };
+        const exportNode = { entity_id: _gridExportId, name: 'การไฟฟ้า', color: '#7B8FD4' };
         if (_gridExportAdd) exportNode.add_entities = _gridExportAdd;
         sankeyDest.push(exportNode);
       }
@@ -6951,7 +6988,7 @@ return forecast.map(function(d) {
           ? [e.grid_import_high_tariff === _gridImportId ? e.grid_import_low_tariff : e.grid_import_high_tariff]
           : undefined;
       }
-      const gridImportNode = { entity_id: _gridImportId, name: 'Grid', color: '#6B8FD4', children: gridImportChildren };
+      const gridImportNode = { entity_id: _gridImportId, name: 'การไฟฟ้า', color: '#6B8FD4', children: gridImportChildren };
       if (_gridImportAdd) gridImportNode.add_entities = _gridImportAdd;
 
       // Resolve Sankey color theme
@@ -6961,16 +6998,16 @@ return forecast.map(function(d) {
       const _sankeyNodes = [];
       // Source nodes
       if (e.solar_energy_today) _sankeyNodes.push({
-        id: 'solar', name: 'Solar', color: _sTheme.solar, entity_id: e.solar_energy_today, type: 'source',
+        id: 'solar', name: 'โซลาร์', color: _sTheme.solar, entity_id: e.solar_energy_today, type: 'source',
         children: solarChildren.map(x => typeof x === 'string' ? x : x?.entity_id).filter(Boolean), parents: []
       });
       if (e.battery_discharge_today) _sankeyNodes.push({
-        id: 'bat_d', name: 'Battery', color: _sTheme.battery, entity_id: e.battery_discharge_today, type: 'source',
+        id: 'bat_d', name: 'แบตเตอรี่', color: _sTheme.battery, entity_id: e.battery_discharge_today, type: 'source',
         children: battDischargeChildren.map(x => typeof x === 'string' ? x : x?.entity_id).filter(Boolean), parents: []
       });
       if (_gridImportId) {
         const _giNode = {
-          id: 'grid_i', name: 'Grid', color: _sTheme.grid_import, entity_id: _gridImportId, type: 'source',
+          id: 'grid_i', name: 'การไฟฟ้า', color: _sTheme.grid_import, entity_id: _gridImportId, type: 'source',
           children: gridImportChildren.map(x => typeof x === 'string' ? x : x?.entity_id).filter(Boolean), parents: []
         };
         if (_gridImportAdd) _giNode.add_entities = _gridImportAdd;
@@ -6978,31 +7015,31 @@ return forecast.map(function(d) {
       }
       // Destination nodes
       if (e.load_energy_today) _sankeyNodes.push({
-        id: 'load', name: 'Home', color: _sTheme.home, entity_id: e.load_energy_today, type: 'dest',
+        id: 'load', name: 'บ้าน', color: _sTheme.home, entity_id: e.load_energy_today, type: 'dest',
         children: [], parents: [e.solar_energy_today, e.battery_discharge_today, _gridImportId].filter(Boolean)
       });
       if (e.battery_charge_today) _sankeyNodes.push({
-        id: 'bat_c', name: 'Battery', color: _sTheme.battery, entity_id: e.battery_charge_today, type: 'dest',
+        id: 'bat_c', name: 'แบตเตอรี่', color: _sTheme.battery, entity_id: e.battery_charge_today, type: 'dest',
         children: [], parents: [e.solar_energy_today, _gridImportId].filter(Boolean)
       });
       if (_gridExportId) {
         const _geNode = {
-          id: 'grid_e', name: 'Grid', color: _sTheme.grid_export, entity_id: _gridExportId, type: 'dest',
+          id: 'grid_e', name: 'การไฟฟ้า', color: _sTheme.grid_export, entity_id: _gridExportId, type: 'dest',
           children: [], parents: [e.solar_energy_today, e.battery_discharge_today].filter(Boolean)
         };
         if (_gridExportAdd) _geNode.add_entities = _gridExportAdd;
         _sankeyNodes.push(_geNode);
       }
       if (f.show_ev_in_sankey && evSankeyEntity) _sankeyNodes.push({
-        id: 'ev', name: 'EV', color: _sTheme.ev, entity_id: evSankeyEntity, type: 'dest',
+        id: 'ev', name: 'รถ EV', color: _sTheme.ev, entity_id: evSankeyEntity, type: 'dest',
         children: [], parents: [e.solar_energy_today, e.battery_discharge_today, _gridImportId].filter(Boolean)
       });
       if (f.show_hp_in_sankey && hpSankeyEntity) _sankeyNodes.push({
-        id: 'hp', name: 'HP', color: _sTheme.hp, entity_id: hpSankeyEntity, type: 'dest',
+        id: 'hp', name: 'ปั๊มความร้อน', color: _sTheme.hp, entity_id: hpSankeyEntity, type: 'dest',
         children: [], parents: [e.solar_energy_today, e.battery_discharge_today, _gridImportId].filter(Boolean)
       });
       if (f.show_losses_in_sankey) _sankeyNodes.push({
-        id: 'losses', name: 'Losses', color: _sTheme.losses, entity_id: '_sankey_losses', type: 'dest',
+        id: 'losses', name: 'การสูญเสีย', color: _sTheme.losses, entity_id: '_sankey_losses', type: 'dest',
         children: [], parents: []
       });
 
@@ -7019,16 +7056,16 @@ return forecast.map(function(d) {
       const _panelNodes = [];
       // Source nodes
       if (e.solar_energy_today) _panelNodes.push({
-        id: 'solar', name: 'Solar', color: _sTheme.solar, entity_id: e.solar_energy_today, type: 'source',
+        id: 'solar', name: 'โซลาร์', color: _sTheme.solar, entity_id: e.solar_energy_today, type: 'source',
         children: solarChildren.map(eid => eid), parents: []
       });
       if (e.battery_discharge_today) _panelNodes.push({
-        id: 'bat_d', name: 'Battery Discharged', color: _sTheme.battery, entity_id: e.battery_discharge_today, type: 'source',
+        id: 'bat_d', name: 'แบตเตอรี่ (จ่ายออก)', color: _sTheme.battery, entity_id: e.battery_discharge_today, type: 'source',
         children: battDischargeChildren.map(eid => eid), parents: []
       });
       if (_gridImportId) {
         const _giPanelNode = {
-          id: 'grid_i', name: 'Grid Imported', color: _sTheme.grid_import, entity_id: _gridImportId, type: 'source',
+          id: 'grid_i', name: 'การไฟฟ้า (รับเข้า)', color: _sTheme.grid_import, entity_id: _gridImportId, type: 'source',
           children: gridImportChildren.map(eid => eid), parents: []
         };
         if (_gridImportAdd) _giPanelNode.add_entities = _gridImportAdd;
@@ -7036,27 +7073,27 @@ return forecast.map(function(d) {
       }
       // Destination nodes
       if (e.load_energy_today) _panelNodes.push({
-        id: 'load', name: 'Home Consumed', color: _sTheme.home, entity_id: e.load_energy_today, type: 'dest',
+        id: 'load', name: 'ใช้ในบ้าน', color: _sTheme.home, entity_id: e.load_energy_today, type: 'dest',
         children: [], parents: [e.solar_energy_today, e.battery_discharge_today, _gridImportId].filter(Boolean)
       });
       if (e.battery_charge_today) _panelNodes.push({
-        id: 'bat_c', name: 'Battery Charged', color: _sTheme.battery, entity_id: e.battery_charge_today, type: 'dest',
+        id: 'bat_c', name: 'แบตเตอรี่ (ชาร์จเข้า)', color: _sTheme.battery, entity_id: e.battery_charge_today, type: 'dest',
         children: [], parents: [e.solar_energy_today, _gridImportId].filter(Boolean)
       });
       if (_gridExportId) {
         const _gePanelNode = {
-          id: 'grid_e', name: 'Grid Exported', color: _sTheme.grid_export, entity_id: _gridExportId, type: 'dest',
+          id: 'grid_e', name: 'การไฟฟ้า (ขายออก)', color: _sTheme.grid_export, entity_id: _gridExportId, type: 'dest',
           children: [], parents: [e.solar_energy_today, e.battery_discharge_today].filter(Boolean)
         };
         if (_gridExportAdd) _gePanelNode.add_entities = _gridExportAdd;
         _panelNodes.push(_gePanelNode);
       }
       if (f.show_ev_in_sankey && evSankeyEntity) _panelNodes.push({
-        id: 'ev', name: 'EV Charger', color: _sTheme.ev, entity_id: evSankeyEntity, type: 'dest',
+        id: 'ev', name: 'ที่ชาร์จรถ EV', color: _sTheme.ev, entity_id: evSankeyEntity, type: 'dest',
         children: [], parents: [e.solar_energy_today, e.battery_discharge_today, _gridImportId].filter(Boolean)
       });
       if (f.show_hp_in_sankey && hpSankeyEntity) _panelNodes.push({
-        id: 'hp', name: 'Heat Pump', color: _sTheme.hp, entity_id: hpSankeyEntity, type: 'dest',
+        id: 'hp', name: 'ปั๊มความร้อน', color: _sTheme.hp, entity_id: hpSankeyEntity, type: 'dest',
         children: [], parents: [e.solar_energy_today, e.battery_discharge_today, _gridImportId].filter(Boolean)
       });
 
@@ -7105,7 +7142,7 @@ return forecast.map(function(d) {
       newCards.push({ ...batteryCard, view_layout: { 'grid-column': '1 / -1' } });
 
       // Card 3: Apex chart + self-sufficiency (full width)
-      newCards.push({ ..._sectionDivider('FORECAST', '📈'), view_layout: { 'grid-column': '1 / -1' } });
+      newCards.push({ ..._sectionDivider('พยากรณ์', '📈'), view_layout: { 'grid-column': '1 / -1' } });
       const chartStack = [];
       if (f.expandable_forecast) chartStack.push({ type: 'custom:sigenergy-forecast-modal-button' });
       chartStack.push(apexChart);
@@ -7183,7 +7220,7 @@ return forecast.map(function(d) {
     const d = cfg.display || {};
     el.innerHTML = `
       <div class="section">
-        <div class="section-title">Theme</div>
+        <div class="section-title">ธีม</div>
         <div class="price-grid" style="grid-template-columns:1fr 1fr 1fr;">
           <div class="price-btn ${d.theme==='dark'?'active':''}" data-theme="dark">🌙 Dark</div>
           <div class="price-btn ${d.theme==='light'?'active':''}" data-theme="light">☀️ Light</div>
@@ -7191,10 +7228,10 @@ return forecast.map(function(d) {
         </div>
         <div style="font-size:10px;color:#666;margin-top:4px;">Auto: follows your HA theme (${this._detectHaTheme() === 'dark' ? 'currently dark' : 'currently light'})</div>
       </div>
-      <div class="section" style="border:1px solid ${d.kiosk_mode ? '#00d4b8' : '#2d3451'};border-radius:12px;padding:12px;transition:all 0.3s;">
+      <div class="section" style="border:1px solid ${d.kiosk_mode ? '#f5a623' : '#2d3451'};border-radius:12px;padding:12px;transition:all 0.3s;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div>
-            <div style="font-size:12px;font-weight:600;color:${d.kiosk_mode ? '#00d4b8' : '#8892a4'};">🖥️ Kiosk Mode</div>
+            <div style="font-size:12px;font-weight:600;color:${d.kiosk_mode ? '#f5a623' : '#8892a4'};">🖥️ Kiosk Mode</div>
             <div style="font-size:10px;color:#666;margin-top:2px;">Hides sidebar & header for wall-mounted displays</div>
           </div>
           <div class="switch ${d.kiosk_mode ? 'on' : 'off'}" data-key="kiosk_mode_toggle" style="flex-shrink:0;margin-left:12px;"></div>
@@ -7202,7 +7239,7 @@ return forecast.map(function(d) {
         <div style="margin-top:8px;padding:8px 10px;background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.25);border-radius:6px;font-size:10px;color:#ffa726;line-height:1.5;">⚠️ Enabling kiosk mode will redirect you to the overview (main) dashboard page. To exit kiosk mode, click the <b>✕</b> button in the top-right corner.</div>
       </div>
       <div class="section">
-        <div class="section-title">Formatting</div>
+        <div class="section-title">รูปแบบตัวเลข</div>
         <div class="row">
           <span class="row-label">Decimal Places</span>
           <select class="row-input" data-key="decimal_places">
@@ -7251,7 +7288,7 @@ return forecast.map(function(d) {
         </div>
       </div>
       <div class="section">
-        <div class="section-title">Energy Flow (Sankey)</div>
+        <div class="section-title">การไหลพลังงาน (Sankey)</div>
         <div class="row">
           <span class="row-label">Color Theme</span>
           <select class="row-input" data-key="sankey_color_theme">
@@ -7262,7 +7299,7 @@ return forecast.map(function(d) {
         </div>
       </div>
       <div class="section">
-        <div class="section-title">Charts</div>
+        <div class="section-title">กราฟ</div>
         <div class="row">
           <span class="row-label">Default Range</span>
           <select class="row-input" data-key="chart_range">
@@ -7283,7 +7320,7 @@ return forecast.map(function(d) {
         </div>
       </div>
       <div class="section">
-        <div class="section-title">🖱️ Modal Settings</div>
+        <div class="section-title">🖱️ ตั้งค่าหน้าต่าง</div>
         <div class="row">
           <span class="row-label">Modal Animation</span>
           <select class="row-input" data-key="modal_animation">
@@ -7305,7 +7342,7 @@ return forecast.map(function(d) {
         </div>
       </div>
       <div class="section">
-        <div class="section-title">💾 Configuration Profiles</div>
+        <div class="section-title">💾 โปรไฟล์การตั้งค่า</div>
         <div style="font-size:10px;color:#666;margin-bottom:8px;">Save up to 3 named snapshots of your entire configuration (entities, features, pricing, display).</div>
         ${(() => {
           const profiles = JSON.parse(localStorage.getItem('sigenergy_dashboard_profiles') || '[]');
@@ -7314,9 +7351,9 @@ return forecast.map(function(d) {
             const nameVal = p ? this._esc(p.name || 'Profile ' + (i+1)) : '';
             const savedAt = p ? new Date(p.savedAt).toLocaleString() : '';
             return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:8px;background:rgba(45,52,81,0.4);border-radius:8px;">' +
-              '<span style="font-size:12px;font-weight:600;color:#00d4b8;min-width:18px;">' + (i+1) + '</span>' +
+              '<span style="font-size:12px;font-weight:600;color:#f5a623;min-width:18px;">' + (i+1) + '</span>' +
               '<input class="row-input profile-name" data-slot="' + i + '" value="' + nameVal + '" placeholder="Profile ' + (i+1) + '" style="flex:1;max-width:140px;" />' +
-              '<button class="profile-save-btn" data-slot="' + i + '" style="padding:4px 8px;background:#00d4b8;color:#1a1f2e;border:none;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;">Save</button>' +
+              '<button class="profile-save-btn" data-slot="' + i + '" style="padding:4px 8px;background:#f5a623;color:#1a1f2e;border:none;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;">Save</button>' +
               (p ? '<button class="profile-load-btn" data-slot="' + i + '" style="padding:4px 8px;background:#3F51B5;color:#fff;border:none;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;">Load</button>' +
               '<button class="profile-del-btn" data-slot="' + i + '" style="padding:4px 8px;background:#e74c3c;color:#fff;border:none;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;">✕</button>' : '') +
               (savedAt ? '<span style="font-size:9px;color:#8892a4;">' + savedAt + '</span>' : '<span style="font-size:9px;color:#666;">Empty</span>') +
@@ -7411,7 +7448,7 @@ return forecast.map(function(d) {
         if (prof.config.pricing) cfg2.pricing = { ...cfg2.pricing, ...prof.config.pricing };
         if (prof.config.display) cfg2.display = { ...cfg2.display, ...prof.config.display };
         this._storeSave(cfg2);
-        btn.textContent = '✅ Loaded'; setTimeout(() => { this._render(); }, 500);
+        btn.textContent = '✅ โหลดแล้ว'; setTimeout(() => { this._render(); }, 500);
       });
     });
     el.querySelectorAll('.profile-del-btn').forEach(btn => {
@@ -8710,7 +8747,7 @@ class SigenergySankeyPanel extends HTMLElement {
     this._updateStatsPanel();
     } catch (err) {
       console.error('Genergy SankeyPanel render error:', err);
-      this.shadowRoot.innerHTML = `<div style="padding:24px;color:#E53935;font-size:13px;">⚠ Energy Flow panel failed to render</div>`;
+      this.shadowRoot.innerHTML = `<div style="padding:24px;color:#E53935;font-size:13px;">⚠ ไม่สามารถแสดงแผนภาพการไหลของพลังงานได้</div>`;
     }
   }
 
@@ -8749,8 +8786,8 @@ class SigenergySankeyPanel extends HTMLElement {
     if (gridI) chips.push({ node: gridI, val: gridIVal, icon: '🔌', label: 'Grid Imported' });
     if (gridE) chips.push({ node: gridE, val: gridEVal, icon: '⚡', label: 'Grid Exported' });
     // Add EV/HP only if they fit in a clean 3-column grid (max 6 for 3×2)
-    if (chips.length < 6 && ev && evVal > 0.01) chips.push({ node: ev, val: evVal, icon: '🚗', label: 'EV Charged' });
-    if (chips.length < 6 && hp && hpVal > 0.01) chips.push({ node: hp, val: hpVal, icon: '🌡️', label: 'Heat Pump' });
+    if (chips.length < 6 && ev && evVal > 0.01) chips.push({ node: ev, val: evVal, icon: '🚗', label: 'ชาร์จ EV' });
+    if (chips.length < 6 && hp && hpVal > 0.01) chips.push({ node: hp, val: hpVal, icon: '🌡️', label: 'ปั๊มความร้อน' });
 
     const fmt = (v) => v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2);
 
@@ -9091,7 +9128,7 @@ class SigenergyInsightsCard extends HTMLElement {
       title: 'Revenue',
       icon: '💰',
       getValue: () => {
-        const cur = cfg.pricing?.currency || '€';
+        const cur = cfg.pricing?.currency || '฿';
         const savings = this._getVal(ents.emhass_savings_today);
         const cost = this._getVal(ents.emhass_net_cost_today);
         // Fallback to HA Energy Dashboard cost entities
@@ -9541,48 +9578,48 @@ class SigenergyInsightsCard extends HTMLElement {
 
     switch (tileId) {
       case 'battery':
-        addRow('State of Charge', ents.battery_soc, '%', 0);
-        addRow('Temperature', ents.battery_temp, '°C', 1);
-        addRow('Voltage', ents.battery_voltage, ' V', 1);
-        addRow('Current', ents.battery_current, ' A', 2);
-        addRow('Power', ents.battery_power, null, null, false, true);
-        addRow('Capacity', ents.battery_capacity, ' kWh', 1);
-        addRow('Max SoC', ents.battery_max_soc, '%', 0);
-        addRow('Min SoC', ents.battery_min_soc, '%', 0);
-        addRow('Cycles', ents.battery_cycles, '', 0);
+        addRow('ระดับแบตเตอรี่', ents.battery_soc, '%', 0);
+        addRow('อุณหภูมิ', ents.battery_temp, '°C', 1);
+        addRow('แรงดันไฟ', ents.battery_voltage, ' V', 1);
+        addRow('กระแสไฟ', ents.battery_current, ' A', 2);
+        addRow('กำลังไฟ', ents.battery_power, null, null, false, true);
+        addRow('ความจุ', ents.battery_capacity, ' kWh', 1);
+        addRow('SoC สูงสุด', ents.battery_max_soc, '%', 0);
+        addRow('SoC ต่ำสุด', ents.battery_min_soc, '%', 0);
+        addRow('รอบการชาร์จ', ents.battery_cycles, '', 0);
         break;
       case 'capacity':
-        addRow('Total Capacity', ents.battery_capacity, ' kWh', 1);
-        addRow('Max SoC Limit', ents.battery_max_soc, '%', 0);
-        addRow('Min SoC Limit', ents.battery_min_soc, '%', 0);
-        addRow('Charge Power', ents.battery_charge_power, null, null, false, true);
-        addRow('Discharge Power', ents.battery_discharge_power, null, null, false, true);
+        addRow('ความจุรวม', ents.battery_capacity, ' kWh', 1);
+        addRow('ขีดจำกัด SoC สูงสุด', ents.battery_max_soc, '%', 0);
+        addRow('ขีดจำกัด SoC ต่ำสุด', ents.battery_min_soc, '%', 0);
+        addRow('กำลังชาร์จ', ents.battery_charge_power, null, null, false, true);
+        addRow('กำลังจ่ายออก', ents.battery_discharge_power, null, null, false, true);
         break;
       case 'environmental':
-        addRow('Solar Today', ents.solar_energy_today, ' kWh', 1, true);
-        addRow('Grid Export', ents.grid_export_today, ' kWh', 1, true);
-        addRow('Grid Import', ents.grid_import_today, ' kWh', 1, true);
-        addRow('Self-Sufficiency', ents.self_sufficiency, '%', 0);
-        addRow('Solar Power Now', ents.solar_power, null, null, false, true);
+        addRow('โซลาร์วันนี้', ents.solar_energy_today, ' kWh', 1, true);
+        addRow('ขายไฟออก', ents.grid_export_today, ' kWh', 1, true);
+        addRow('รับไฟเข้า', ents.grid_import_today, ' kWh', 1, true);
+        addRow('พึ่งพาตนเอง', ents.self_sufficiency, '%', 0);
+        addRow('กำลังผลิตโซลาร์ขณะนี้', ents.solar_power, null, null, false, true);
         break;
       case 'equipment':
-        addRow('Inverter Temp', ents.inverter_temp || ents.inverter_internal_temp, '°C', 1);
-        addRow('Inverter Power', ents.inverter_active_power, null, null, false, true);
-        addRow('Grid Frequency', ents.grid_frequency, ' Hz', 2);
+        addRow('อุณหภูมิอินเวอร์เตอร์', ents.inverter_temp || ents.inverter_internal_temp, '°C', 1);
+        addRow('กำลังไฟอินเวอร์เตอร์', ents.inverter_active_power, null, null, false, true);
+        addRow('ความถี่ไฟกริด', ents.grid_frequency, ' Hz', 2);
         break;
       case 'network':
-        addRow('Voltage', ents.grid_voltage, ' V', 1);
-        addRow('Frequency', ents.grid_frequency, ' Hz', 2);
-        addRow('Grid Power', ents.grid_active_power || ents.grid_power, null, null, false, true);
-        addRow('Import Today', ents.grid_import_today, ' kWh', 1, true);
-        addRow('Export Today', ents.grid_export_today, ' kWh', 1, true);
+        addRow('แรงดันไฟ', ents.grid_voltage, ' V', 1);
+        addRow('ความถี่', ents.grid_frequency, ' Hz', 2);
+        addRow('กำลังไฟกริด', ents.grid_active_power || ents.grid_power, null, null, false, true);
+        addRow('รับไฟเข้าวันนี้', ents.grid_import_today, ' kWh', 1, true);
+        addRow('ขายไฟออกวันนี้', ents.grid_export_today, ' kWh', 1, true);
         break;
       case 'revenue': {
-        const cur = ' ' + (cfg.pricing?.currency || '€');
-        addRow('Savings Today', ents.emhass_savings_today, cur, 2);
-        addRow('Net Cost', ents.emhass_net_cost_today, cur, 2);
-        addRow('Import Cost', ents.grid_import_cost_today || 'sensor.imported_energy_total_cost', cur, 2);
-        addRow('Export Revenue', ents.grid_export_revenue_today || 'sensor.exported_energy_total_compensation', cur, 2);
+        const cur = ' ' + (cfg.pricing?.currency || '฿');
+        addRow('ประหยัดวันนี้', ents.emhass_savings_today, cur, 2);
+        addRow('ค่าไฟสุทธิ', ents.emhass_net_cost_today, cur, 2);
+        addRow('ค่าไฟที่ซื้อ', ents.grid_import_cost_today || 'sensor.imported_energy_total_cost', cur, 2);
+        addRow('รายได้จากการขาย', ents.grid_export_revenue_today || 'sensor.exported_energy_total_compensation', cur, 2);
         break;
       }
     }
@@ -9802,7 +9839,7 @@ class SigenergyDeviceCard extends HTMLElement {
       console.error('[Genergy DeviceCard] Render error:', err);
       this.shadowRoot.innerHTML = '<div style="background:var(--ha-card-background,#1a1f2e);border-radius:16px;padding:20px;color:var(--primary-text-color,#fff);text-align:center;">' +
         '<div style="font-size:24px;margin-bottom:8px;">⚠️</div>' +
-        '<div style="font-size:14px;font-weight:600;margin-bottom:4px;">Battery System Error</div>' +
+        '<div style="font-size:14px;font-weight:600;margin-bottom:4px;">เกิดข้อผิดพลาดในระบบแบตเตอรี่</div>' +
         '<div style="font-size:11px;color:#8892a4;">' + (err.message || 'Unknown error').replace(/</g, '&lt;') + '</div></div>';
     }
   }
@@ -9838,7 +9875,7 @@ class SigenergyDeviceCard extends HTMLElement {
         '</div>' +
         '<div style="display:flex;gap:8px">' +
         '<button class="prereq-dismiss-overview" style="background:none;border:1px solid var(--divider-color,#4a4e5866);border-radius:8px;padding:4px 12px;font-size:11px;color:var(--secondary-text-color,#8892a4);cursor:pointer">Dismiss</button>' +
-        '<a href="/dashboard-sigenergy/settings" style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,212,184,0.1);border:1px solid rgba(0,212,184,0.3);border-radius:8px;padding:4px 12px;text-decoration:none;font-size:11px;color:#00d4b8">Open Settings ↗</a>' +
+        '<a href="/dashboard-sigenergy/settings" style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,212,184,0.1);border:1px solid rgba(0,212,184,0.3);border-radius:8px;padding:4px 12px;text-decoration:none;font-size:11px;color:#f5a623">Open Settings ↗</a>' +
         '</div></div>';
     }
 
@@ -9857,15 +9894,15 @@ class SigenergyDeviceCard extends HTMLElement {
       var html = '<style>:host{display:block}.card{background:var(--ha-card-background,' + _cBg + ');border-radius:16px;padding:12px;overflow:hidden;text-align:center;color:var(--primary-text-color,' + _cText + ')}.img{max-width:100%;height:auto;margin:0 auto 12px;display:block}.labels{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.pill{background:var(--card-background-color,' + _cPillBg + ');border:1px solid var(--divider-color,' + _cBorder + ');border-radius:14px;padding:8px 14px;display:flex;align-items:center;gap:8px;min-width:0;cursor:pointer}.pill-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}.pill-name{font-size:15px;font-weight:600;color:var(--primary-text-color,' + _cName + ');white-space:nowrap}.pill-val{font-size:16px;font-weight:700;color:var(--primary-text-color,' + _cText + ');white-space:nowrap}</style>';
       html += '<div class="card">';
       html += prereqBanner;
-      html += '<img class="img" src="' + imgSrc + '" alt="Battery System"/>';
+      html += '<img class="img" src="' + imgSrc + '" alt="ระบบแบตเตอรี่"/>';
       html += '<div class="labels">';
-      html += '<div class="pill" style="border-color:rgba(46,204,113,0.35)"><span class="pill-dot" style="background:#2ecc71"></span><span class="pill-name">Inverter</span><span class="pill-val">' + invFmt + '</span></div>';
+      html += '<div class="pill" style="border-color:rgba(46,204,113,0.35)"><span class="pill-dot" style="background:#2ecc71"></span><span class="pill-name">อินเวอร์เตอร์</span><span class="pill-val">' + invFmt + '</span></div>';
       for (var i = 1; i <= np; i++) {
         var soc = packSocs[i-1];
         var col = this._socColor(soc);
         var socTxt = soc !== null ? soc.toFixed(1) + '%' : '?';
         var socPct = soc !== null ? Math.min(100, Math.max(0, soc)) : 0;
-        html += '<div class="pill" style="border-color:' + col + '35;position:relative;overflow:hidden"><div class="soc-bar" style="position:absolute;bottom:0;left:0;width:' + socPct + '%;height:3px;background:' + col + ';border-radius:0 0 14px 14px;transition:width 0.8s ease;opacity:0.7"></div><span class="pill-dot" style="background:' + col + '"></span><span class="pill-name">Batt ' + i + '</span><span class="pill-val">' + socTxt + '</span></div>';
+        html += '<div class="pill" style="border-color:' + col + '35;position:relative;overflow:hidden"><div class="soc-bar" style="position:absolute;bottom:0;left:0;width:' + socPct + '%;height:3px;background:' + col + ';border-radius:0 0 14px 14px;transition:width 0.8s ease;opacity:0.7"></div><span class="pill-dot" style="background:' + col + '"></span><span class="pill-name">แบต ' + i + '</span><span class="pill-val">' + socTxt + '</span></div>';
       }
       html += '</div></div>';
       this.shadowRoot.innerHTML = html;
@@ -10118,7 +10155,7 @@ class SigenergyDeviceCard extends HTMLElement {
       '<div style="position:absolute;left:0;top:0;height:100%;width:' + totalPct + '%;background:' + totalCol + ';border-radius:3px;transition:width 0.8s ease;"></div></div>' +
       '<span style="font-size:13px;font-weight:700;color:' + totalCol + ';white-space:nowrap;">' + (totalSoc !== null ? totalSoc.toFixed(1) + '%' : '—') + '</span></div>';
     this.shadowRoot.innerHTML =
-      '<style>:host{display:block}.card{background:var(--ha-card-background,' + _wBg + ');border-radius:16px;padding:12px 4px;overflow:hidden;color:var(--primary-text-color,' + _wText + ')} .chevron{cursor:pointer;pointer-events:all;-webkit-tap-highlight-color:transparent;touch-action:manipulation;outline:none} .chevron *{pointer-events:all} .chevron:hover circle,.chevron:active circle,.chevron:focus circle{fill:' + _wChevHover + '} .chevron:focus{outline:2px solid #00d4b8;outline-offset:2px;border-radius:50%}</style>' +
+      '<style>:host{display:block}.card{background:var(--ha-card-background,' + _wBg + ');border-radius:16px;padding:12px 4px;overflow:hidden;color:var(--primary-text-color,' + _wText + ')} .chevron{cursor:pointer;pointer-events:all;-webkit-tap-highlight-color:transparent;touch-action:manipulation;outline:none} .chevron *{pointer-events:all} .chevron:hover circle,.chevron:active circle,.chevron:focus circle{fill:' + _wChevHover + '} .chevron:focus{outline:2px solid #f5a623;outline-offset:2px;border-radius:50%}</style>' +
       '<div class="card">' + prereqBanner +
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + TW + ' ' + TH + '" width="100%" style="display:block">' +
       b + '</svg>' + totalSocBar + panels + '</div>';

@@ -250,7 +250,7 @@ class GenergyDashboardConfigFlow(
                 self._data[CONF_FEATURE_SOLCAST] = False
                 self._data[CONF_BATTERY_PACKS] = 1
                 return self.async_create_entry(
-                    title="Genergy Dashboard",
+                    title="Teerathap sigenergy",
                     data=self._data,
                 )
             return await self.async_step_core()
@@ -296,7 +296,7 @@ class GenergyDashboardConfigFlow(
             # Merge EMHASS/Solcast defaults based on feature toggles
             _merge_feature_defaults(self._data)
             return self.async_create_entry(
-                title="Genergy Dashboard",
+                title="Teerathap sigenergy",
                 data=self._data,
             )
         return self.async_show_form(
@@ -350,7 +350,7 @@ class GenergyDashboardOptionsFlow(config_entries.OptionsFlow):
             self._data.update(user_input)
             _merge_feature_defaults(self._data)
             return self.async_create_entry(
-                title="Genergy Dashboard",
+                title="Teerathap sigenergy",
                 data=self._data,
             )
         current = {**self._config_entry.data, **self._config_entry.options}

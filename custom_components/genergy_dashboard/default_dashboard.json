@@ -129,7 +129,7 @@
               "cards": [
                 {
                   "type": "custom:mushroom-template-card",
-                  "primary": "Energy Flow Today",
+                  "primary": "การไหลของพลังงานวันนี้",
                   "icon": "mdi:chart-sankey-variant",
                   "icon_color": "teal",
                   "card_mod": {
@@ -217,7 +217,7 @@
               "cards": [
                 {
                   "type": "custom:mushroom-template-card",
-                  "primary": "Battery System",
+                  "primary": "ระบบแบตเตอรี่",
                   "icon": "mdi:battery-charging-wireless",
                   "icon_color": "teal",
                   "card_mod": {
@@ -244,7 +244,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__solar_power__",
-                  "primary": "Solar",
+                  "primary": "โซลาร์",
                   "icon": "mdi:solar-power",
                   "icon_color": "orange",
                   "secondary": "{{ states('__solar_power__') | round(0) }} W",
@@ -255,7 +255,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__load_power__",
-                  "primary": "Home",
+                  "primary": "บ้าน",
                   "icon": "mdi:home-lightning-bolt",
                   "icon_color": "deep-purple",
                   "secondary": "{{ states('__load_power__') | round(0) }} W",
@@ -266,7 +266,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__battery_soc__",
-                  "primary": "Battery",
+                  "primary": "แบตเตอรี่",
                   "icon": "mdi:battery",
                   "icon_color": "green",
                   "secondary": "{{ states('__battery_soc__') | round(0) }}%",
@@ -277,7 +277,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__grid_power__",
-                  "primary": "Grid",
+                  "primary": "การไฟฟ้า",
                   "icon": "mdi:transmission-tower",
                   "icon_color": "red",
                   "secondary": "{{ states('__grid_power__') | round(0) }} W",
@@ -298,7 +298,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__solar_energy_today__",
-                  "primary": "Solar",
+                  "primary": "โซลาร์",
                   "icon": "mdi:solar-power",
                   "icon_color": "orange",
                   "secondary": "{% set v = states('__solar_energy_today__') | float(0) %}{% set u = state_attr('__solar_energy_today__', 'unit_of_measurement') %}{{ ((v * 1000) | round(1)) if u == 'MWh' else ((v / 1000) | round(1)) if u == 'Wh' else (v | round(1)) }} kWh",
@@ -309,7 +309,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__load_energy_today__",
-                  "primary": "Load",
+                  "primary": "ใช้ไฟ",
                   "icon": "mdi:power-plug",
                   "icon_color": "purple",
                   "secondary": "{% set v = states('__load_energy_today__') | float(0) %}{% set u = state_attr('__load_energy_today__', 'unit_of_measurement') %}{{ ((v * 1000) | round(1)) if u == 'MWh' else ((v / 1000) | round(1)) if u == 'Wh' else (v | round(1)) }} kWh",
@@ -320,7 +320,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__battery_charge_today__",
-                  "primary": "Charged",
+                  "primary": "ชาร์จเข้า",
                   "icon": "mdi:battery-arrow-up",
                   "icon_color": "green",
                   "secondary": "{% set v = states('__battery_charge_today__') | float(0) %}{% set u = state_attr('__battery_charge_today__', 'unit_of_measurement') %}{{ ((v * 1000) | round(1)) if u == 'MWh' else ((v / 1000) | round(1)) if u == 'Wh' else (v | round(1)) }} kWh",
@@ -331,7 +331,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__battery_discharge_today__",
-                  "primary": "Discharged",
+                  "primary": "จ่ายออก",
                   "icon": "mdi:battery-arrow-down",
                   "icon_color": "teal",
                   "secondary": "{% set v = states('__battery_discharge_today__') | float(0) %}{% set u = state_attr('__battery_discharge_today__', 'unit_of_measurement') %}{{ ((v * 1000) | round(1)) if u == 'MWh' else ((v / 1000) | round(1)) if u == 'Wh' else (v | round(1)) }} kWh",
@@ -342,7 +342,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__grid_import_today__",
-                  "primary": "Imported",
+                  "primary": "รับไฟเข้า",
                   "icon": "mdi:transmission-tower-import",
                   "icon_color": "red",
                   "secondary": "{% set v = states('__grid_import_today__') | float(0) %}{% set u = state_attr('__grid_import_today__', 'unit_of_measurement') %}{{ ((v * 1000) | round(1)) if u == 'MWh' else ((v / 1000) | round(1)) if u == 'Wh' else (v | round(1)) }} kWh",
@@ -353,7 +353,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__grid_export_today__",
-                  "primary": "Exported",
+                  "primary": "ขายไฟออก",
                   "icon": "mdi:transmission-tower-export",
                   "icon_color": "blue",
                   "secondary": "{% set v = states('__grid_export_today__') | float(0) %}{% set u = state_attr('__grid_export_today__', 'unit_of_measurement') %}{{ ((v * 1000) | round(1)) if u == 'MWh' else ((v / 1000) | round(1)) if u == 'Wh' else (v | round(1)) }} kWh",
@@ -375,7 +375,7 @@
                     "show": true,
                     "show_states": true,
                     "colorize_states": true,
-                    "title": "Energy + EMHASS Forecast"
+                    "title": "พลังงาน + พยากรณ์ EMHASS"
                   },
                   "graph_span": "48h",
                   "update_interval": "60s",
@@ -507,7 +507,7 @@
                       "opposite": true,
                       "apex_config": {
                         "title": {
-                          "text": "Price (EUR/kWh)",
+                          "text": "ราคา (฿/kWh)",
                           "style": {
                             "fontSize": "12px"
                           }
@@ -726,7 +726,7 @@
                       "color": "#EF9A9A",
                       "type": "line",
                       "extend_to": false,
-                      "unit": " EUR/kWh",
+                      "unit": " ฿/kWh",
                       "float_precision": 4,
                       "stroke_width": 1,
                       "opacity": 0.9,
@@ -745,7 +745,7 @@
                       "color": "#90CAF9",
                       "type": "line",
                       "extend_to": false,
-                      "unit": " EUR/kWh",
+                      "unit": " ฿/kWh",
                       "float_precision": 4,
                       "stroke_width": 1,
                       "opacity": 0.9,
@@ -766,7 +766,7 @@
                       "opacity": 0.55,
                       "stroke_width": 2,
                       "extend_to": false,
-                      "unit": " EUR/kWh",
+                      "unit": " ฿/kWh",
                       "float_precision": 4,
                       "group_by": {
                         "func": "avg",
@@ -787,7 +787,7 @@
                       "opacity": 0.55,
                       "stroke_width": 2,
                       "extend_to": false,
-                      "unit": " EUR/kWh",
+                      "unit": " ฿/kWh",
                       "float_precision": 4,
                       "group_by": {
                         "func": "avg",
@@ -802,7 +802,7 @@
                     },
                     {
                       "entity": "__mpc_deferrable0__",
-                      "name": "Heat Pump (plan)",
+                      "name": "ปั๊มความร้อน (พยากรณ์)",
                       "color": "#FF6D00",
                       "type": "area",
                       "opacity": 0.05,
@@ -844,7 +844,7 @@
                     },
                     {
                       "entity": "__heat_pump_power__",
-                      "name": "Heat Pump",
+                      "name": "ปั๊มความร้อน",
                       "color": "#E65100",
                       "type": "line",
                       "stroke_width": 1.5,
@@ -867,7 +867,7 @@
                     {
                       "entity": "__emhass_net_cost_today__",
                       "name": "Cost Today",
-                      "unit": " EUR",
+                      "unit": " ฿",
                       "show": {
                         "legend_value": true,
                         "in_chart": false,
@@ -879,7 +879,7 @@
                     {
                       "entity": "__emhass_savings_today__",
                       "name": "Savings Today",
-                      "unit": " EUR",
+                      "unit": " ฿",
                       "color": "#4CAF50",
                       "show": {
                         "legend_value": true,
@@ -894,7 +894,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "entity": "__solar_energy_today__",
-                  "primary": "Self-Sufficiency",
+                  "primary": "พึ่งพาตนเองได้",
                   "secondary": "{% set solar = states('__solar_energy_today__') | float(0) %}{% set load = states('__load_energy_today__') | float(1) %}{{ ((solar / load) * 100) | round(1) if load > 0 else 0 }}%",
                   "icon": "mdi:check-decagram",
                   "icon_color": "green",
@@ -970,8 +970,8 @@
               "forecast_solar_today": "",
               "mpc_deferrable0": "__mpc_deferrable0__",
               "mpc_deferrable1": "__mpc_deferrable1__",
-              "deferrable0_label": "Heat Pump",
-              "deferrable1_label": "Boiler",
+              "deferrable0_label": "ปั๊มความร้อน",
+              "deferrable1_label": "หม้อต้มน้ำ",
               "deferrable0_power": "__heat_pump_power__",
               "deferrable1_power": "",
               "mpc_cost_fun": "__mpc_cost_fun__",
@@ -998,10 +998,10 @@
               "solar_forecast": true
             },
             "pricing": {
-              "source": "nordpool",
-              "cheap_threshold": 0.1,
-              "expensive_threshold": 0.25,
-              "currency": "\u20ac",
+              "source": "custom",
+              "cheap_threshold": 3.0,
+              "expensive_threshold": 4.5,
+              "currency": "฿",
               "show_price_overlay": true,
               "show_price_badge": true,
               "show_color_coding": true
@@ -1053,7 +1053,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "primary": "{{ states('__buy_price__') | float(0) | round(4) }}",
-                  "secondary": "Buy Price (\u20ac/kWh)",
+                  "secondary": "ราคารับซื้อ (฿/kWh)",
                   "icon": "mdi:cash-plus",
                   "icon_color": "red",
                   "card_mod": {
@@ -1066,7 +1066,7 @@
                 {
                   "type": "custom:mushroom-template-card",
                   "primary": "{{ states('__sell_price__') | float(0) | round(4) }}",
-                  "secondary": "Sell Price (\u20ac/kWh)",
+                  "secondary": "ราคาขายออก (฿/kWh)",
                   "icon": "mdi:cash-minus",
                   "icon_color": "green",
                   "card_mod": {
@@ -1078,13 +1078,13 @@
                 },
                 {
                   "type": "custom:mushroom-template-card",
-                  "primary": "{{ states('__emhass_savings_today__') | float(0) | round(2) }}\u20ac",
-                  "secondary": "Savings Today",
+                  "primary": "{{ states('__emhass_savings_today__') | float(0) | round(2) }}฿",
+                  "secondary": "ประหยัดได้วันนี้",
                   "icon": "mdi:piggy-bank",
                   "icon_color": "amber",
                   "card_mod": {
                     "style": {
-                      "ha-tile-info$": ".primary { font-size: 20px !important; font-weight: bold !important; color: #00c875 !important; } .secondary { color: #8892a4 !important; font-size: 10px !important; }",
+                      "ha-tile-info$": ".primary { font-size: 20px !important; font-weight: bold !important; color: #1aae84 !important; } .secondary { color: #8892a4 !important; font-size: 10px !important; }",
                       ".": "ha-card { background-color: #22273a !important; border: 1px solid #2d3451 !important; border-radius: 16px !important; }"
                     }
                   },
@@ -1099,9 +1099,9 @@
               "cards": [
                 {
                   "type": "custom:mushroom-template-card",
-                  "primary": "{{ states('__emhass_net_cost_month__') | float(0) | round(2) }}\u20ac",
-                  "secondary": "Net Cost This Month",
-                  "icon": "mdi:currency-eur",
+                  "primary": "{{ states('__emhass_net_cost_month__') | float(0) | round(2) }}฿",
+                  "secondary": "ค่าไฟสุทธิเดือนนี้",
+                  "icon": "mdi:cash",
                   "icon_color": "{% if states('__emhass_net_cost_month__') | float(0) < 0 %}green{% else %}red{% endif %}",
                   "card_mod": {
                     "style": {
@@ -1113,13 +1113,13 @@
                 },
                 {
                   "type": "custom:mushroom-template-card",
-                  "primary": "{{ states('__emhass_savings_monthly__') | float(0) | round(2) }}\u20ac",
-                  "secondary": "Savings This Month",
+                  "primary": "{{ states('__emhass_savings_monthly__') | float(0) | round(2) }}฿",
+                  "secondary": "ประหยัดได้เดือนนี้",
                   "icon": "mdi:cash-check",
                   "icon_color": "green",
                   "card_mod": {
                     "style": {
-                      "ha-tile-info$": ".primary { font-size: 20px !important; font-weight: bold !important; color: #00c875 !important; } .secondary { color: #8892a4 !important; font-size: 10px !important; }",
+                      "ha-tile-info$": ".primary { font-size: 20px !important; font-weight: bold !important; color: #1aae84 !important; } .secondary { color: #8892a4 !important; font-size: 10px !important; }",
                       ".": "ha-card { background-color: #22273a !important; border: 1px solid #2d3451 !important; border-radius: 16px !important; }"
                     }
                   },
@@ -1127,8 +1127,8 @@
                 },
                 {
                   "type": "custom:mushroom-template-card",
-                  "primary": "{{ states('__emhass_projected_bill__') | float(0) | round(2) }}\u20ac",
-                  "secondary": "Projected Monthly Bill",
+                  "primary": "{{ states('__emhass_projected_bill__') | float(0) | round(2) }}฿",
+                  "secondary": "ประมาณการค่าไฟทั้งเดือน",
                   "icon": "mdi:receipt-text",
                   "icon_color": "blue",
                   "card_mod": {
@@ -1141,13 +1141,13 @@
                 },
                 {
                   "type": "custom:mushroom-template-card",
-                  "primary": "{{ states('__emhass_projected_savings__') | float(0) | round(2) }}\u20ac",
-                  "secondary": "Projected Monthly Savings",
+                  "primary": "{{ states('__emhass_projected_savings__') | float(0) | round(2) }}฿",
+                  "secondary": "ประมาณการเงินประหยัดทั้งเดือน",
                   "icon": "mdi:hand-coin",
                   "icon_color": "teal",
                   "card_mod": {
                     "style": {
-                      "ha-tile-info$": ".primary { font-size: 20px !important; font-weight: bold !important; color: #00c875 !important; } .secondary { color: #8892a4 !important; font-size: 10px !important; }",
+                      "ha-tile-info$": ".primary { font-size: 20px !important; font-weight: bold !important; color: #1aae84 !important; } .secondary { color: #8892a4 !important; font-size: 10px !important; }",
                       ".": "ha-card { background-color: #22273a !important; border: 1px solid #2d3451 !important; border-radius: 16px !important; }"
                     }
                   },
@@ -1158,7 +1158,7 @@
             {
               "type": "custom:mushroom-template-card",
               "primary": "{{ states('__emhass_battery_summary__') }}",
-              "secondary": "Battery Action Summary",
+              "secondary": "สรุปการสั่งงานแบตเตอรี่",
               "icon": "mdi:robot",
               "icon_color": "teal",
               "card_mod": {
@@ -1171,7 +1171,7 @@
             {
               "type": "custom:mushroom-template-card",
               "primary": "{{ states('__emhass_last_decision__') }}",
-              "secondary": "Last MPC Decision",
+              "secondary": "การตัดสินใจ MPC ล่าสุด",
               "icon": "mdi:brain",
               "icon_color": "purple",
               "card_mod": {
@@ -1184,7 +1184,7 @@
             {
               "type": "custom:mushroom-template-card",
               "primary": "{{ states('__mpc_optim_status__') }}",
-              "secondary": "MPC Optimizer Status | Last run: {{ as_timestamp(states.__mpc_battery__.last_updated) | timestamp_custom('%H:%M') }}",
+              "secondary": "สถานะตัวจัดการ MPC | รันล่าสุด: {{ as_timestamp(states.__mpc_battery__.last_updated) | timestamp_custom('%H:%M') }}",
               "icon": "mdi:chart-bell-curve-cumulative",
               "icon_color": "{% if states('__mpc_optim_status__') == 'Optimal' %}green{% else %}red{% endif %}",
               "multiline_secondary": true,
@@ -1203,7 +1203,7 @@
                 {
                   "type": "custom:mushroom-entity-card",
                   "entity": "__emhass_mpc_automation__",
-                  "name": "MPC Optimizer",
+                  "name": "ตัวจัดการ MPC",
                   "icon": "mdi:robot",
                   "tap_action": {
                     "action": "toggle"
@@ -1218,7 +1218,7 @@
                 {
                   "type": "custom:mushroom-entity-card",
                   "entity": "__emhass_battery_automation__",
-                  "name": "Battery Control",
+                  "name": "ควบคุมแบตเตอรี่",
                   "icon": "mdi:battery-sync",
                   "tap_action": {
                     "action": "toggle"
@@ -1235,7 +1235,7 @@
             {
               "type": "custom:mushroom-template-card",
               "primary": "Deye SUN-SG05LP1-EU",
-              "secondary": "Rated: {{ states('__inverter_rated_power__') | default('5000') }}W | Temp: {{ states('__inverter_temp__') | default('?') }}\u00b0C",
+              "secondary": "พิกัด: {{ states('__inverter_rated_power__') | default('5000') }}W | อุณหภูมิ: {{ states('__inverter_temp__') | default('?') }}\u00b0C",
               "icon": "mdi:solar-power-variant",
               "icon_color": "amber",
               "multiline_secondary": true,

@@ -1,6 +1,6 @@
 {
     "domain": "genergy_dashboard",
-    "name": "Genergy Dashboard",
+    "name": "Teerathap sigenergy",
     "codeowners": ["@SpengeSec"],
     "config_flow": true,
     "dependencies": ["frontend", "lovelace"],

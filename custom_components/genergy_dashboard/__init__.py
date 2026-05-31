@@ -187,7 +187,7 @@ async def _check_prerequisites(hass: HomeAssistant) -> None:
     )
     pn_create(
         hass,
-        title="🎨 Genergy Dashboard: Missing HACS Cards",
+        title="Teerathap sigenergy: ขาดการ์ด HACS",
         message=(
             f"The following HACS frontend cards are required but not installed:\n\n"
             f"{card_list}\n\n"
